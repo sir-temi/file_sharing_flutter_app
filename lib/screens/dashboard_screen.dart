@@ -21,61 +21,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isInit = false;
 
   @override
-  void didChangeDependencies() {
-    if (!_isInit) {
+  void initState() {
+    setState(() {
+      _isLoading = true;
+    });
+
+    Provider.of<Files>(context, listen: false)
+        .fetchAndSetFiles()
+        .catchError((error) {
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
-
-      Provider.of<Files>(context, listen: false)
-          .fetchAndSetFiles()
-          .catchError((error) {
-        setState(() {
-          _isLoading = false;
-        });
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: Text('OOPS',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColorDark,
-                          fontWeight: FontWeight.bold)),
-                  content: Text(
-                    error.toString().contains('SocketException')
-                        ? 'Network problem, please try again.'
-                        : error.toString(),
+      showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('OOPS',
                     style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  actions: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        RaisedButton(
-                          padding: EdgeInsets.all(10),
-                          color: Theme.of(context).primaryColor,
-                          child: Text('GO BACK',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          onPressed: () => Navigator.of(context).pop(),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                        ),
-                      ],
-                    )
-                  ],
-                ));
-      }).then((_) {
-        setState(() {
-          _isLoading = false;
-        });
+                        color: Theme.of(context).primaryColorDark,
+                        fontWeight: FontWeight.bold)),
+                content: Text(
+                  error.toString().contains('SocketException')
+                      ? 'Network problem, please try again.'
+                      : error.toString(),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                actions: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      RaisedButton(
+                        padding: EdgeInsets.all(10),
+                        color: Theme.of(context).primaryColor,
+                        child: Text('GO BACK',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        onPressed: () => Navigator.of(context).pop(),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                    ],
+                  )
+                ],
+              ));
+    }).then((_) {
+      setState(() {
+        _isLoading = false;
       });
-
-      _isInit = true;
-    }
-    super.didChangeDependencies();
+    });
+    super.initState();
   }
 
   @override
@@ -87,7 +83,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final fontsize = MediaQuery.of(context).textScaleFactor;
     final appBarheight = appBar.preferredSize.height;
     final batterybar = MediaQuery.of(context).padding.top;
-    final screenSize = screensize.height - (appBarheight + batterybar);
+    final paddingButtom = MediaQuery.of(context).padding.bottom;
+    final screenSize =
+        screensize.height - (appBarheight + batterybar + paddingButtom);
     final userName = Provider.of<Auth>(context, listen: false).userName;
     List files = Provider.of<Files>(context, listen: false).userFiles;
     final uploads = Provider.of<Files>(context, listen: false).totalUploads;
@@ -99,6 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ? Loading('')
           : SingleChildScrollView(
               child: Container(
+                // height: screenSize,
                 padding: EdgeInsets.only(top: 20, left: 10, right: 10),
                 child: Column(
                   children: [
@@ -133,21 +132,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         )),
                     Container(
-                      margin: EdgeInsets.only(top: 10),
-                      height: screenSize * 0.88,
+                      // padding: EdgeInsets.only(top: 2),
+                      height: screenSize * 0.86,
                       child: ListView.builder(
                           itemCount: files.length,
                           itemBuilder: (ctx, i) {
                             return Dismissible(
                               key: Key(files[i].identifier),
+                              direction: DismissDirection.endToStart,
                               onDismissed: (direction) {
-                                // Remove the item from the data source.
-                                // setState(() {
-                                //   items.removeAt(index);
-                                // });
-                                print('The file has been removed.');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Dismissed')));
+                                showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                          title: Text('Please Confirm',
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .primaryColorDark,
+                                                  fontWeight: FontWeight.bold)),
+                                          content: Text(
+                                            'Are you sure you want to delete this file?',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          actions: <Widget>[
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              children: <Widget>[
+                                                RaisedButton(
+                                                  padding: EdgeInsets.all(10),
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  child: Text('No',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white)),
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pushReplacementNamed('/dashboard'),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20)),
+                                                ),
+                                                SizedBox(width: 5),
+                                                RaisedButton(
+                                                  padding: EdgeInsets.all(10),
+                                                  color: Colors.red,
+                                                  child: Text('Delete',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.white)),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _isLoading = true;
+                                                    });
+
+                                                    Provider.of<Files>(context,
+                                                            listen: false)
+                                                        .deleteFile(
+                                                            files[i].identifier)
+                                                        .then((value) {
+                                                      Navigator.of(context)
+                                                          .pushReplacementNamed(
+                                                              '/dashboard');
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(SnackBar(
+                                                              content: Text(
+                                                                  'File Deleted')));
+                                                    });
+                                                  },
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20)),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ));
                               },
                               background: Container(
                                 alignment: Alignment.centerRight,
@@ -159,18 +226,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                               child: InkWell(
-                                
-                                onTap: () => Navigator.of(context).pushNamed(FileDetailScreen.routeName, arguments: files[i].identifier),
+                                onTap: () {
+                                  Navigator.of(context).pushNamed('/details',
+                                      arguments: files[i].identifier);
+                                },
                                 child: Container(
                                   child: Column(
                                     children: [
                                       Container(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 4),
+                                        // padding:
+                                        //     EdgeInsets.symmetric(vertical: 2),
                                         child: ListTile(
-                                          leading: Image.network(
-                                            files[i].thumbnail,
-                                            fit: BoxFit.contain,
+                                          leading: Container(
+                                            width: screenSize * .11,
+                                            child: Image.network(
+                                              files[i].thumbnail,
+                                              fit: BoxFit.fill,
+                                            ),
                                           ),
                                           title: Text(
                                             files[i].title,
@@ -191,6 +263,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     child: Text(
                                                   '${files[i].mimeType.split("/")[0][0].toUpperCase()}${files[i].mimeType.split("/")[0].substring(1)}',
                                                   style: TextStyle(
+                                                      color: Colors.grey,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       fontSize: fontsize * 16),
@@ -199,6 +272,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     child: Text(
                                                   files[i].sizeMb,
                                                   style: TextStyle(
+                                                      color: Colors.grey,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       fontSize: fontsize * 17),
@@ -219,6 +293,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           .downloaded
                                                           .toString(),
                                                       style: TextStyle(
+                                                          color: Colors.grey,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           fontSize:

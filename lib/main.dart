@@ -1,5 +1,6 @@
 import 'package:cemfrontend/providers/files.dart';
 import 'package:cemfrontend/screens/dashboard_screen.dart';
+import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
               routes: {
                 AuthScreen.routeName: (ctx) => AuthScreen(),
                 DashboardScreen.routeName: (ctx) => DashboardScreen(),
+                FileDetailScreen.routeName: (ctx) => FileDetailScreen(),
               }),
         ));
   }

@@ -83,55 +83,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_register == false) {
-				setState(() {
-          _isLoading = true;
-        });
 
-        final response = await Provider.of<Auth>(context, listen: false)
+        await Provider.of<Auth>(context, listen: false)
             .signIn(_data['loginUsername'], _data['password']);
-				
-				if (response == 200){
-					print('Successful');
-					setState(() {
-          _isLoading = false;
-					clearFields();
-					_data = {'username': '', 'fullName': '', 'email': '', 'password': '', 'loginUsername': ''};
-        });
-				} else{
-					print('Bad');
-					setState(() {
-          _isLoading = false;
-        });
-				}
-
-        
-        // Navigator.of(context).pushReplacementNamed('/result', arguments: res);
 
       } else {
-        setState(() {
-          _isLoading = true;
-        });
-
-        final response = await Provider.of<Auth>(context, listen: false)
+        
+        await Provider.of<Auth>(context, listen: false)
             .signUp(_data['fullName'].split(' ')[0], _data['fullName'].split(' ')[1], _data['username'].toLowerCase(), _data['password'], _data['email']);
-				
-				if (response == 200){
-					print('Successful');
-					setState(() {
-          _isLoading = false;
-					
-        });
-				} else{
-					print('Bad');
-					setState(() {
-          _isLoading = false;
-        });
-				}
+
       }
     } catch (error) {
-				setState(() {
-          _isLoading = false;
-        });
         showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
@@ -164,8 +126,24 @@ class _AuthScreenState extends State<AuthScreen> {
                   ],
                 ));
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _logInUsernameController.dispose();
+		_logInPasswordController.dispose();
+
+    _usernameController.dispose();
+    _fullNameController.dispose();
+    _passwordController.dispose();
+    _emailController.dispose();
+		_confirmPasswordController.dispose();
+  }
   @override
   Widget build(BuildContext context) {
 		if (_data['fullName'].length != 0) {
