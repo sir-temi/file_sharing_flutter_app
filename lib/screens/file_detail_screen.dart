@@ -1,12 +1,21 @@
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:cemfrontend/widgets/drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_share/social_share.dart';
 
 import '../providers/auth.dart';
 import '../providers/files.dart';
 import '../widgets/loading.dart';
 import '../widgets/detail_rows.dart';
+
+
 
 class FileDetailScreen extends StatefulWidget {
   const FileDetailScreen({Key? key}) : super(key: key);
@@ -27,6 +36,35 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
 
   var isUser = false;
   var title = '';
+
+  ReceivePort _port = ReceivePort();
+
+  @override
+  void initState() {
+    super.initState();
+
+    IsolateNameServer.registerPortWithName(_port.sendPort, 'downloader_send_port');
+    _port.listen((dynamic data) {
+      String id = data[0];
+      DownloadTaskStatus status = data[1];
+      int progress = data[2];
+      setState((){ });
+    });
+
+    FlutterDownloader.registerCallback(downloadCallback);
+  }
+
+  @override
+  void dispose() {
+    IsolateNameServer.removePortNameMapping('downloader_send_port');
+    super.dispose();
+  }
+
+
+  static void downloadCallback(String id, DownloadTaskStatus status, int progress) {
+    final SendPort? send = IsolateNameServer.lookupPortByName('downloader_send_port');
+    send!.send([id, status, progress]);
+  }
 
 
   void didChangeDependencies() {
@@ -61,15 +99,84 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = MediaQuery.of(context).textScaleFactor;
     final PreferredSizeWidget appBar = AppBar(
       title:
           Text(title),
-      // actions: [
-      //   IconButton(onPressed: () => Navigator.of(context).pop(), icon: Icon(Icons.back)
-      // ],
+      actions: [
+        IconButton(
+          icon: Icon(Icons.share_rounded),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => SimpleDialog(
+                title: const Text('Share File',),
+                children: <Widget>[
+                  SimpleDialogOption(
+                    onPressed: () { 
+                      SocialShare.shareWhatsapp(
+                        "Download this file from TemiShare \n ${result['data']['file']}"
+                        );
+                      },
+                    child: Row(
+                      children: [
+                        FaIcon(FontAwesomeIcons.whatsapp, 
+                        color: Color.fromRGBO(37, 211, 102, 1), 
+                        size: fontSize * 28,
+                        ),
+                        SizedBox(width: 5,),
+                        Text(' Share via WhatsApp', style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: fontSize * 17,
+                        ))
+                      ],
+                    ),
+                  ),
+                  SimpleDialogOption(
+                    onPressed: () { 
+                      SocialShare.shareTwitter(
+                              "Download this file from TemiShare",
+                              url:result['data']['file']);
+                      },
+                    child: Row(
+                      children: [
+                        FaIcon(FontAwesomeIcons.twitter, 
+                        color: Color.fromRGBO(29, 161, 242, 1), 
+                        size: fontSize * 28,),
+                        SizedBox(width: 5,),
+                        Text(' Share via Twitter', style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: fontSize * 17,
+                        ))
+                      ],
+                    ),
+                  ),
+                  SimpleDialogOption(
+                    onPressed: () { 
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushNamed('/search_user', arguments: result['data']['identifier']);
+                      },
+                    child: Row(
+                      children: [
+                        FaIcon(FontAwesomeIcons.userAlt, color: Theme.of(context).primaryColorDark, size: fontSize * 25),
+                        SizedBox(width: 5,),
+                        Text(' Share via Username', style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: fontSize * 17,
+                        ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            );
+          }, 
+          ),
+        BackButton(onPressed: () => Navigator.of(context).pushReplacementNamed('/dashboard')),
+      ],
     );
     final screensize = MediaQuery.of(context).size;
-    final fontSize = MediaQuery.of(context).textScaleFactor;
     final appBarheight = appBar.preferredSize.height;
     final batterybar = MediaQuery.of(context).padding.top;
     final screenSize = screensize.height - (appBarheight + batterybar);
@@ -325,8 +432,12 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                       ScaffoldMessenger.of(
                                                               context)
                                                           .showSnackBar(SnackBar(
+                                                              backgroundColor: Theme.of(context).primaryColor,
+                                                              elevation: 8.0,
                                                               content: Text(
-                                                                  'File Deleted')));
+                                                                  'File Deleted',
+                                                                  style: TextStyle(color: Colors.white, fontWeight:FontWeight.bold ),
+                                                                  )));
                                                     });
                                                   },
                                                   shape: RoundedRectangleBorder(
@@ -351,7 +462,37 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                     size: fontSize * 35,
                     color: Colors.white,
                   ),
-                  onPressed: () => print('Clocked')),
+                onPressed: () async{
+                  final status = await Permission.storage.request();
+                  if (status.isGranted){
+
+                  setState(() {
+                    _isLoading = true;
+
+                     Provider.of<Files>(context, listen: false)
+                    .downloadFile(result['data']['identifier'], result['data']['mimeType']);
+                    _isLoading = false;
+                    Navigator.of(context).pushNamed('/download', arguments: result['data']['identifier']);
+                  });
+
+
+                  } else{
+
+                    print('Permission denied');
+                    Navigator.of(context).pop();
+
+                  }
+                  // setState(() {
+                  //   _isLoading = true;
+                  // });
+                  // final taskId = await FlutterDownloader.enqueue(
+                  //   url: result['data']['file'],
+                  //   savedDir: 'the path of directory where you want to save downloaded files',
+                  //   showNotification: true, // show download progress in status bar (for Android)
+                  //   openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+                  // );
+                  
+                }),
             ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
-	static const routeName = '/auth';
+  static const routeName = '/auth';
 
   @override
   _AuthScreenState createState() => _AuthScreenState();
@@ -16,7 +16,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _isLoading = false;
 
-  Map _data = {'username': '', 'fullName': '', 'email': '', 'password': '', 'loginUsername': ''};
+  Map _data = {
+    'username': '',
+    'fullName': '',
+    'email': '',
+    'password': '',
+    'loginUsername': ''
+  };
 
   void _updateValue(value, field) {
     _data[field] = value;
@@ -40,14 +46,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void clearFields() {
-		_logInUsernameController.clear();
-		_logInPasswordController.clear();
+    _logInUsernameController.clear();
+    _logInPasswordController.clear();
 
     _usernameController.clear();
     _fullNameController.clear();
     _passwordController.clear();
     _emailController.clear();
-		_confirmPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   // void test() {
@@ -83,48 +89,51 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_register == false) {
-
         await Provider.of<Auth>(context, listen: false)
             .signIn(_data['loginUsername'], _data['password']);
-
       } else {
-        
-        await Provider.of<Auth>(context, listen: false)
-            .signUp(_data['fullName'].split(' ')[0], _data['fullName'].split(' ')[1], _data['username'].toLowerCase(), _data['password'], _data['email']);
-
+        await Provider.of<Auth>(context, listen: false).signUp(
+            _data['fullName'].split(' ')[0],
+            _data['fullName'].split(' ')[1],
+            _data['username'].toLowerCase(),
+            _data['password'],
+            _data['email']);
       }
     } catch (error) {
-        showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-                  title: Text('OOPS',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColorDark,
-                          fontWeight: FontWeight.bold)),
-                  content: Text(
-										error.toString().contains('SocketException')
-                    ? 'Network problem, please try again.'
-										:error.toString(),
+      showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                title: Text('OOPS',
                     style: TextStyle(
-                        color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  actions: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        RaisedButton(
-                          padding: EdgeInsets.all(10),
-                          color: Theme.of(context).primaryColor,
-                          child: Text('GO BACK',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                          onPressed: () =>
-                              Navigator.of(context).pop(),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                        ),
-                      ],
-                    )
-                  ],
-                ));
+                        color: Theme.of(context).primaryColorDark,
+                        fontWeight: FontWeight.bold)),
+                content: Text(
+                  error.toString().contains('SocketException')
+                      ? 'Network problem, please try again.'
+                      : error.toString(),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                actions: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      RaisedButton(
+                        padding: EdgeInsets.all(10),
+                        color: Theme.of(context).primaryColor,
+                        child: Text('GO BACK',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        onPressed: () => Navigator.of(context).pop(),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                    ],
+                  )
+                ],
+              ));
     }
     setState(() {
       _isLoading = false;
@@ -136,17 +145,18 @@ class _AuthScreenState extends State<AuthScreen> {
     // TODO: implement dispose
     super.dispose();
     _logInUsernameController.dispose();
-		_logInPasswordController.dispose();
+    _logInPasswordController.dispose();
 
     _usernameController.dispose();
     _fullNameController.dispose();
     _passwordController.dispose();
     _emailController.dispose();
-		_confirmPasswordController.dispose();
+    _confirmPasswordController.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-		if (_data['fullName'].length != 0) {
+    if (_data['fullName'].length != 0) {
       _fullNameController.text = _data['fullName'];
     }
     if (_data['email'].length != 0) {
@@ -155,10 +165,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_data['username'].length != 0) {
       _usernameController.text = _data['username'];
     }
-		if (_data['loginUsername'].length != 0) {
+    if (_data['loginUsername'].length != 0) {
       _logInUsernameController.text = _data['loginUsername'];
     }
-    
+
     final deviceSize = MediaQuery.of(context).size;
     final fontSize = MediaQuery.of(context).textScaleFactor;
     return Scaffold(
@@ -172,8 +182,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-											height: deviceSize.width * .2,
-											width: deviceSize.width * .2,
+                      height: deviceSize.width * .2,
+                      width: deviceSize.width * .2,
                       child: CircularProgressIndicator.adaptive(
                         strokeWidth: fontSize * 10,
                       ),
@@ -479,9 +489,12 @@ class _AuthScreenState extends State<AuthScreen> {
                                                     } else if (v.contains(
                                                         new RegExp(r'[0-9]'))) {
                                                       return "Names don't have numbers";
-                                                    }else if (v.split(' ').length < 2){
-																											return 'Please enter your Last name';
-																										}
+                                                    } else if (v
+                                                            .split(' ')
+                                                            .length <
+                                                        2) {
+                                                      return 'Please enter your Last name';
+                                                    }
                                                   },
                                                   onSaved: (v) {
                                                     _data['fullName'] = v;

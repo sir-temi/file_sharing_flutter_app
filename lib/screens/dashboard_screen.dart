@@ -4,9 +4,13 @@ import 'package:cemfrontend/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../main.dart';
 import '../widgets/drawer.dart';
 import '../providers/auth.dart';
 import '../providers/files.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -19,9 +23,43 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = false;
   bool _isInit = false;
-
+  final FirebaseMessaging fbm = FirebaseMessaging.instance;
+  
   @override
   void initState() {
+    super.initState();
+    
+    var initializationSettingsAndroid = 
+        AndroidInitializationSettings('@mipmap/logo');
+
+    var initializationSettings = 
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                icon: 'launch_background',
+              ),
+            ));
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (!_isInit) {
     setState(() {
       _isLoading = true;
     });
@@ -29,9 +67,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Provider.of<Files>(context, listen: false)
         .fetchAndSetFiles()
         .catchError((error) {
-      setState(() {
-        _isLoading = false;
-      });
+      // setState(() {
+      //   _isLoading = false;
+      // });
       showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -71,7 +109,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
     });
-    super.initState();
+    _isInit = true;
+    }
+    super.didChangeDependencies();
   }
 
   @override

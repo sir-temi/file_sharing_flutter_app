@@ -1,6 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 class FileItem {
   String? identifier;
@@ -88,14 +97,6 @@ class Files with ChangeNotifier {
     return _userFiles.length;
   }
 
-  getCountry() async {
-    try {
-      final response = await http.get(Uri.parse('http://ip-api.com/json'));
-      return json.decode(response.body)['country'].toString();
-    } catch (err) {
-      throw ('Network error, please try again');
-    }
-  }
 
   Future<Map> getFileDetails(String identifier, String? userAccessing) async {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
@@ -110,7 +111,6 @@ class Files with ChangeNotifier {
           throw ('This file is not available.');
         } else if (response.statusCode == 200) {
           final file = json.decode(response.body)['data'];
-          print(file);
           return {
             'message': true,
             'isUser': false,
@@ -134,7 +134,8 @@ class Files with ChangeNotifier {
           };
         }
       } else {
-        final country = getCountry();
+        final res = await http.get(Uri.parse('http://ip-api.com/json'));
+        final country = json.decode(res.body)['country'].toString();
         String identity = identifier+'-'+country;
         final response = await http.get(
           Uri.parse('http://10.0.2.2:8000/api/v1/files/$identity/'),
@@ -165,6 +166,8 @@ class Files with ChangeNotifier {
     }
     throw ('ERROR');
   }
+
+
 
   Future<void> fetchAndSetFiles() async {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
@@ -209,13 +212,18 @@ class Files with ChangeNotifier {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
 
     try {
-      final response = await http.put(url,
+
+      final response = await http.put(
+          url,
           headers: {'Authorization': 'Bearer $authToken'},
-          body: {'category': category});
+          body: {'category': category}
+          );
       if (response.statusCode != 200) {
         throw ('ERROR');
       }
+
       notifyListeners();
+
     } catch (e) {
       throw (e);
     }
@@ -233,7 +241,59 @@ class Files with ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
+
       throw (e);
+
     }
   }
+
+  
+  Future<void> downloadFile(String identifier, String mimeType) async {
+
+        final res = await http.get(Uri.parse('http://ip-api.com/json'));
+        final country = json.decode(res.body)['country'].toString();
+        String identity = identifier+'-'+country;
+
+        final dirs = await getExternalStorageDirectories();
+        final path = dirs![0].path;
+        final file = File('$path/yuy87.png');
+        print(dirs);
+        print(path);
+        print(file.path);
+        final status = await Permission.storage.status;
+        print('Status $status');
+          
+          final url = 'http://10.0.2.2:8000/api/v1/files/download/$identity/';
+
+          try{
+
+          final taskId = await FlutterDownloader.enqueue(
+            url: url,
+            headers: {'Authorization': 'Bearer $authToken'},
+            savedDir: path,
+            showNotification: true, // show download progress in status bar (for Android)
+            openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+          );
+            notifyListeners();
+          }catch(e){
+            throw(e);
+          }
+
+
+
+    }
+
+    Future<List> validateUser(String username) async{
+      final url = 'http://10.0.2.2:8000/api/v1/validateuser/$username/';
+
+      final response = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+
+      if (response.statusCode == 404){
+        return [false];
+      }
+
+      return [true, json.decode(response.body)['first_name']];
+
+    }
+
 }

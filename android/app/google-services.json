@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "733755753003",
+    "project_id": "temishare",
+    "storage_bucket": "temishare.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733755753003:android:ea47b6461e3b4afb08606e",
+        "android_client_info": {
+          "package_name": "com.example.cemfrontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733755753003-tqmvet3nfsi02i196c07g30ojbsbkna1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQdGvMXtHxbxQ0xVJnMsezVhixRTOEDSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733755753003-tqmvet3nfsi02i196c07g30ojbsbkna1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
