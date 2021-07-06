@@ -296,4 +296,11 @@ class Files with ChangeNotifier {
 
     }
 
+    Future<bool> shareFile(String username) async{
+      
+
+      return false;
+
+    }
+
 }

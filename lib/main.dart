@@ -17,36 +17,45 @@ import 'screens/search_user.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
 
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print("Handling a background message: ${message.messageId}");
 }
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+                FlutterLocalNotificationsPlugin();
 
- const AndroidNotificationChannel channel = AndroidNotificationChannel(
-                              'high_importance_channel', // id
-                              'High Importance Notifications', // title
-                              'This channel is used for important notifications.', // description
-                              importance: Importance.high,
-                            );
+ AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'High Importance Notifications', // title
+      'This channel is used for important notifications.', // description
+      importance: Importance.high,
+    );
 
 void main() async{ 
   WidgetsFlutterBinding.ensureInitialized();
-    await FlutterDownloader.initialize(
+
+  await FlutterDownloader.initialize(
       debug: true // optional: set false to disable printing logs to console
     );
 
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  channel = const AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'High Importance Notifications', // title
+      'This channel is used for important notifications.', // description
+      importance: Importance.high,
+    );
+
+  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
-        
+
   runApp(MyApp());
   }
 

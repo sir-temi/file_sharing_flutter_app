@@ -9,6 +9,7 @@ import '../widgets/drawer.dart';
 import '../providers/auth.dart';
 import '../providers/files.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 
@@ -24,12 +25,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = false;
   bool _isInit = false;
   final FirebaseMessaging fbm = FirebaseMessaging.instance;
+
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null && initialMessage.data['type'] == 'shared') {
+      Navigator.of(context).pushNamed('/details',
+          arguments: initialMessage.data['identifier']);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      print('${message.data} ======= ${message.notification}');
+      Navigator.of(context).pushNamed('/details',
+          arguments: message.data['identifier']);
+    });
+  }
   
   @override
   void initState() {
     super.initState();
+
+    setupInteractedMessage();
     
-    var initializationSettingsAndroid = 
+    const AndroidInitializationSettings initializationSettingsAndroid = 
         AndroidInitializationSettings('@mipmap/logo');
 
     var initializationSettings = 
@@ -50,11 +76,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 channel.id,
                 channel.name,
                 channel.description,
-                icon: 'launch_background',
+                // icon: 'launch_background',
               ),
             ));
       }
     });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      print('${message.data} ======= ${message.notification}');
+      Navigator.of(context).pushNamed('/details',
+          arguments: message.data['identifier']);
+    });
+
   }
 
   @override
