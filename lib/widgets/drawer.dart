@@ -67,7 +67,7 @@ class DrawerMenu extends StatelessWidget {
           buildListTile(
               'My Profile',
               Icons.dashboard,
-              () => Navigator.of(context).pushReplacementNamed('/dashboard'),
+              () => Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false),
           ),
           buildListTile(
               'My Files',

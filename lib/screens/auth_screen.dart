@@ -205,7 +205,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       padding: EdgeInsets.only(
                           top: 20,
                           bottom:
-                              MediaQuery.of(context).viewInsets.bottom + 10),
+                              20),
                       child: Column(
                         children: [
                           Container(

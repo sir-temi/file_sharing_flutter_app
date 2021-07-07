@@ -173,7 +173,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
             );
           }, 
           ),
-        BackButton(onPressed: () => Navigator.of(context).pushReplacementNamed('/dashboard')),
+        BackButton(onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false)),
       ],
     );
     final screensize = MediaQuery.of(context).size;

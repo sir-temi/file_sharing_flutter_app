@@ -252,77 +252,80 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       drawer: DrawerMenu(userName),
       body: _isLoading
       ? Loading('Searching for user')
-      : Center (
-        child: Container(
-          margin: EdgeInsets.only(top: 30, left: 20, right: 20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              // mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  child: TextFormField(
-                    controller: _usernameController,
-                    onTap: () async {},
-                    style: TextStyle(fontSize: fontSize * 18),
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(
-                        Icons.person,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                      labelText: 'Type the username',
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide: BorderSide(color: Colors.red),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide: BorderSide(color: Colors.red),
-                      ),
-                      enabledBorder: OutlineInputBorder(
+      : GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+              child: Center (
+          child: Container(
+            margin: EdgeInsets.only(top: 30, left: 20, right: 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: TextFormField(
+                      controller: _usernameController,
+                      onTap: () async {},
+                      style: TextStyle(fontSize: fontSize * 18),
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Theme.of(context).primaryColorDark,
+                        ),
+                        labelText: 'Type the username',
+                        errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).primaryColorDark)),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide:
-                            BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorDark)),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).primaryColor),
+                        ),
                       ),
+                      validator: (v) {
+                        if (v!.isEmpty) {
+                          return "Username can't be empty";
+                        } else if (v.length < 4) {
+                          return "Username can't be lesser than 4";
+                        }
+                      },
+                      onSaved: (v) {
+                        data['username'] = v;
+                      },
                     ),
-                    validator: (v) {
-                      if (v!.isEmpty) {
-                        return "Username can't be empty";
-                      } else if (v.length < 4) {
-                        return "Username can't be lesser than 4";
-                      }
-                    },
-                    onSaved: (v) {
-                      data['username'] = v;
-                    },
                   ),
-                ),
-                SizedBox(height: 10,),
-                Container(
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: RaisedButton(
-                            padding: EdgeInsets.all(10),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            color: Theme.of(context).primaryColorDark,
-                            child: 
-                              // ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.share_rounded, color: Colors.white, size: fontSize *30,), SizedBox(width: 10,), Text('Send to ${data['username']}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: fontSize * 20))],) 
-                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.search, color: Colors.white, size: fontSize *30,), SizedBox(width: 10,), Text('Search username', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: fontSize * 20))],),
-                             
-                            onPressed: _submit ),
-                        flex: 2,
-                      ),
-                    ],
+                  SizedBox(height: 10,),
+                  Container(
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: RaisedButton(
+                              padding: EdgeInsets.all(10),
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              color: Theme.of(context).primaryColorDark,
+                              child: 
+                                // ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.share_rounded, color: Colors.white, size: fontSize *30,), SizedBox(width: 10,), Text('Send to ${data['username']}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: fontSize * 20))],) 
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.search, color: Colors.white, size: fontSize *30,), SizedBox(width: 10,), Text('Search username', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: fontSize * 20))],),
+                               
+                              onPressed: _submit ),
+                          flex: 2,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

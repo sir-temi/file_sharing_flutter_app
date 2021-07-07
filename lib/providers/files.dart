@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
+import 'package:filesize/filesize.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -113,7 +113,7 @@ class Files with ChangeNotifier {
           final file = json.decode(response.body)['data'];
           return {
             'message': true,
-            'isUser': false,
+            'isUser': true,
             'alert': 'null',
             'data': {
               'authorisedUser': file['authorised_user'],
@@ -296,10 +296,41 @@ class Files with ChangeNotifier {
 
     }
 
-    Future<bool> shareFile(String username) async{
-      
 
+
+    Future<bool> uploadFile(Map data, File? file, String name) async{
+      final res = await http.get(Uri.parse('http://ip-api.com/json'));
+      final country = json.decode(res.body)['country'].toString();
+     
+     
+      var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
+      var request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $authToken';
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          file!.path
+        )
+        );
+      request.fields['title'] = data['title'];
+      request.fields['title'] = data['title'];
+      request.fields['description'] = data['description'];
+      request.fields['authorised_user'] = data['username'];
+      request.fields['file_name'] = name;
+      request.fields['mb'] = filesize(file.lengthSync(), 1);
+      request.fields['bytes'] = file.lengthSync().toString();
+      request.fields['location'] = country;
+      request.fields['restricted_by_user'] = data['restrictedUser'] ?"true" :"false";
+      request.fields['restricted_by_country'] = data['restrictedCountry'] ?"true" :"false";
+      var response = await request.send();
+
+      if(response.statusCode == 201){
+        return true;
+      }
       return false;
+
+      
+//    
 
     }
 

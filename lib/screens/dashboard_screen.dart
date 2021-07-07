@@ -404,7 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               size: fontsize * 35,
               color: Colors.white,
             ),
-            onPressed: () => print('Clocked')),
+            onPressed: () => Navigator.of(context).pushNamed('/upload_file')),
       ),
     );
   }

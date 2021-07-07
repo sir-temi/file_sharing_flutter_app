@@ -3,6 +3,7 @@ import 'package:cemfrontend/screens/dashboard_screen.dart';
 import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/screens/file_downloaded_screen.dart';
 import 'package:cemfrontend/screens/search_user.dart';
+import 'package:cemfrontend/screens/upload_file.dart';
 import 'package:cemfrontend/widgets/loading.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -96,7 +97,8 @@ class MyApp extends StatelessWidget {
                 DashboardScreen.routeName: (ctx) => DashboardScreen(),
                 FileDetailScreen.routeName: (ctx) => FileDetailScreen(),
                 DownloadScreen.routeName: (ctx) => DownloadScreen(),
-                SearchUserScreen.routeName: (ctx) => SearchUserScreen()
+                SearchUserScreen.routeName: (ctx) => SearchUserScreen(),
+                UploadFileScreen.routeName: (ctx) => UploadFileScreen(),
               }),
         ));
   }
