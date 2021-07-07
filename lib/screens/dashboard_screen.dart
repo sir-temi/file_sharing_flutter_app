@@ -2,6 +2,7 @@ import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/widgets/drawer.dart';
 import 'package:cemfrontend/widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
@@ -169,7 +170,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       drawer: DrawerMenu(userName),
       body: _isLoading
           ? Loading('')
-          : SingleChildScrollView(
+          : files.length < 1
+          ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FaIcon(FontAwesomeIcons.exclamationTriangle, size: fontsize * 10,),
+                Text(
+                  'You have not uploaded any file. Upload by clicking on the bottom right button',
+                  style: TextStyle(
+                  color: Theme.of(context).primaryColorDark,
+                  fontSize: fontsize * 20,
+                  fontWeight: FontWeight.w900)
+                  )
+            ],)
+          ,)
+          :SingleChildScrollView(
               child: Container(
                 // height: screenSize,
                 padding: EdgeInsets.only(top: 20, left: 10, right: 10),

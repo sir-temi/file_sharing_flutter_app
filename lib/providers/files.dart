@@ -113,7 +113,7 @@ class Files with ChangeNotifier {
           final file = json.decode(response.body)['data'];
           return {
             'message': true,
-            'isUser': true,
+            'isUser': false,
             'alert': 'null',
             'data': {
               'authorisedUser': file['authorised_user'],
