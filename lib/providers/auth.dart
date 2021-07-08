@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -85,6 +86,12 @@ class Auth with ChangeNotifier {
           'expiryDate': _expiryDate!.toIso8601String()
         });
         prefs.setString('userData', userData);
+        
+        String? fireToken = await FirebaseMessaging.instance.getToken();
+        
+        final tokenUrl = 'http://10.0.2.2:8000/api/v1/receive_token/$fireToken/';
+
+        await http.post(Uri.parse(tokenUrl), headers: {'Authorization': 'Bearer $_token'});
 
         _restartAutoLogoutTimer();
         notifyListeners();

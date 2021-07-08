@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'dart:convert';
 
 import 'package:path_provider/path_provider.dart';
@@ -83,6 +85,10 @@ class Files with ChangeNotifier {
   //   return _singleResponse;
   // }
 
+  // double? _progress = 0;
+
+  // get uploadProgress => _progress;
+
   Files(this.authToken, this.userName);
 
   List<FileItem> _userFiles = [];
@@ -113,7 +119,7 @@ class Files with ChangeNotifier {
           final file = json.decode(response.body)['data'];
           return {
             'message': true,
-            'isUser': false,
+            'isUser': true,
             'alert': 'null',
             'data': {
               'authorisedUser': file['authorised_user'],
@@ -154,7 +160,7 @@ class Files with ChangeNotifier {
         } else if (response.statusCode == 200) {
           Map file = json.decode(response.body)['data'];
           return {
-            'message': false,
+            'message': true,
             'isUser': false,
             'data': file,
             'alert': 'null'
@@ -239,6 +245,7 @@ class Files with ChangeNotifier {
       if (response.statusCode != 200) {
         throw ('ERROR');
       }
+      _userFiles.removeWhere((e) => e.identifier == identifier);
       notifyListeners();
     } catch (e) {
 
@@ -249,7 +256,6 @@ class Files with ChangeNotifier {
 
   
   Future<void> downloadFile(String identifier, String mimeType) async {
-
         final res = await http.get(Uri.parse('http://ip-api.com/json'));
         final country = json.decode(res.body)['country'].toString();
         String identity = identifier+'-'+country;
@@ -296,13 +302,28 @@ class Files with ChangeNotifier {
 
     }
 
+    Future<bool> validateFile(String identifier) async{
+      print(identifier);
+      final url = 'http://10.0.2.2:8000/api/v1/files/validatefile/$identifier/';
+
+      final response = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+
+      if (response.statusCode == 404){
+        return false;
+      }
+
+      return true;
+
+    }
 
 
-    Future<bool> uploadFile(Map data, File? file, String name) async{
+
+  Future<bool> uploadFile(Map data, File? file, String name) async{
+
       final res = await http.get(Uri.parse('http://ip-api.com/json'));
       final country = json.decode(res.body)['country'].toString();
      
-     
+      
       var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
       var request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $authToken';
@@ -322,16 +343,21 @@ class Files with ChangeNotifier {
       request.fields['location'] = country;
       request.fields['restricted_by_user'] = data['restrictedUser'] ?"true" :"false";
       request.fields['restricted_by_country'] = data['restrictedCountry'] ?"true" :"false";
-      var response = await request.send();
+      // var response = await request.send();
+
+      final StreamedResponse response = await Client().send(request);
 
       if(response.statusCode == 201){
         return true;
       }
       return false;
 
-      
-//    
+    }
 
+    Future<void> shareFile(String username, String identifier) async{
+      final url = 'http://10.0.2.2:8000/api/v1/files/share_file/$username/$identifier/';
+
+      await http.post(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
     }
 
 }

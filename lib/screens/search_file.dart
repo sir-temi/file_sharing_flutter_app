@@ -5,20 +5,20 @@ import 'package:cemfrontend/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SearchUserScreen extends StatefulWidget {
-  const SearchUserScreen({Key? key}) : super(key: key);
-  static const routeName = '/search_user';
+class SearchFileScreen extends StatefulWidget {
+  const SearchFileScreen({Key? key}) : super(key: key);
+  static const routeName = '/search_file';
 
   @override
-  _SearchUserScreenState createState() => _SearchUserScreenState();
+  _SearchFileScreenState createState() => _SearchFileScreenState();
 }
 
-class _SearchUserScreenState extends State<SearchUserScreen> {
+class _SearchFileScreenState extends State<SearchFileScreen> {
   final _formKey = GlobalKey<FormState>();
   var _usernameController = TextEditingController();
   var _isLoading = false;
-  
-  Map data = {'username': '', 'isValid': false};
+  String? _fileNumber = '';
+
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -33,33 +33,31 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
 
     try {
       
-      final response = await Provider.of<Files>(context, listen: false).validateUser(data['username']);
+      final response = await Provider.of<Files>(context, listen: false).validateFile(_fileNumber!);
 
-      if(response[0] == false){
+      if(response == false){
         // setState(() {
         //   _isLoading = false;
         // });
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-                title: Text('Incorrect Username',
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold)),
                 content: Text(
-                  'You searched for an incorrect user, please check and try again.',
+                  'File not found.',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
+                      color: Colors.red,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold),
                 ),
                 actions: <Widget>[
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       RaisedButton(
-                        padding: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(15),
                         color: Theme.of(context).primaryColor,
-                        child: Text('Try Again',
+                        child: Text('Search Again',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
@@ -76,76 +74,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
       setState(() {
         _isLoading = false;
       });
-      showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-                title: Text('User found',
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColorDark,
-                        fontWeight: FontWeight.bold)),
-                content: Text(
-                  data['username'].toUpperCase(),
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                ),
-                actions: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      RaisedButton(
-                        padding: EdgeInsets.all(10),
-                        color: Theme.of(context).primaryColor,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center, 
-                          children: [
-                            Icon(
-                              Icons.share_rounded, 
-                                color: Colors.white, size: 18,
-                              ), 
-                              SizedBox(width: 5,), 
-                              Text(
-                                'SHARE', 
-                                style: TextStyle(
-                                  color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold
-                                  )
-                                )
-                              ]
-                            ),
-                        onPressed: () {
-                          Provider.of<Files>(context, listen: false).shareFile(data['username'], ModalRoute.of(context)?.settings.arguments as String);
-                         
-                          Navigator.of(context).pushReplacementNamed('/dashboard');
-                          ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              elevation: 8.0,
-                              content: Text(
-                                  '${data['username'].toUpperCase()} has been alerted', 
-                                  style: TextStyle(color: Colors.white, fontWeight:FontWeight.bold ),
-                                  )));
-                        },
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      SizedBox(width: 5,),
-                      RaisedButton(
-                        padding: EdgeInsets.all(10),
-                        color: Theme.of(context).primaryColor,
-                        child: Text('Search Again',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.white)),
-                        onPressed: () => Navigator.of(context).pop(),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                    ],
-                  )
-                ],
-              ));
+      Navigator.of(context).pushReplacementNamed('/details', arguments: _fileNumber!.toLowerCase());
       }
     } catch (error) {
       showDialog(
@@ -191,15 +120,14 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   @override
   Widget build(BuildContext context) {
     final fontSize = MediaQuery.of(context).textScaleFactor;
-    final identifier = ModalRoute.of(context)?.settings.arguments as String;
     final userName = Provider.of<Auth>(context, listen: false).userName;
     return Scaffold(
       appBar: AppBar(
-          title: Text('Share by Username'),
+          title: Text('Search for a file'),
           actions: [BackButton(onPressed: () => Navigator.of(context).pop())]),
       drawer: DrawerMenu(userName),
       body: _isLoading
-      ? Loading('Searching for user')
+      ? Loading('Searching for File...')
       : GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
               child: Center (
@@ -217,10 +145,10 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       style: TextStyle(fontSize: fontSize * 18),
                       decoration: InputDecoration(
                         prefixIcon: Icon(
-                          Icons.person,
+                          Icons.bookmark,
                           color: Theme.of(context).primaryColorDark,
                         ),
-                        labelText: 'Type the username',
+                        labelText: 'Type File number',
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                           borderSide: BorderSide(color: Colors.red),
@@ -241,13 +169,12 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       ),
                       validator: (v) {
                         if (v!.isEmpty) {
-                          return "Username can't be empty";
-                        } else if (v.length < 4) {
-                          return "Username can't be lesser than 4";
-                        }
-                      },
+                          return "File number can't be empty";
+                        } else if (v.length != 8) {
+                          return "File number must be 8 characters";
+                      }},
                       onSaved: (v) {
-                        data['username'] = v;
+                        _fileNumber = v;
                       },
                     ),
                   ),

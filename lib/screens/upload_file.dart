@@ -269,7 +269,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
       ]),
       drawer: DrawerMenu(userName),
       body: _isLoading
-          ? Loading('Uploading...')
+          ? Loading('Uploading your file...')
           : GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: SingleChildScrollView(

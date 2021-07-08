@@ -2,6 +2,7 @@ import 'package:cemfrontend/providers/files.dart';
 import 'package:cemfrontend/screens/dashboard_screen.dart';
 import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/screens/file_downloaded_screen.dart';
+import 'package:cemfrontend/screens/search_file.dart';
 import 'package:cemfrontend/screens/search_user.dart';
 import 'package:cemfrontend/screens/upload_file.dart';
 import 'package:cemfrontend/widgets/loading.dart';
@@ -99,6 +100,7 @@ class MyApp extends StatelessWidget {
                 DownloadScreen.routeName: (ctx) => DownloadScreen(),
                 SearchUserScreen.routeName: (ctx) => SearchUserScreen(),
                 UploadFileScreen.routeName: (ctx) => UploadFileScreen(),
+                SearchFileScreen.routeName: (ctx) => SearchFileScreen(),
               }),
         ));
   }

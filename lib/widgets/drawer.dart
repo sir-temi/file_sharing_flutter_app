@@ -65,18 +65,18 @@ class DrawerMenu extends StatelessWidget {
                 )),
           ),
           buildListTile(
-              'My Profile',
+              'My Dashboard',
               Icons.dashboard,
               () => Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false),
           ),
-          buildListTile(
-              'My Files',
-              Icons.list,
-              // () => Navigator.of(context).pushReplacementNamed('/Orders'),
-              () async {
-              print(Provider.of<Auth>(context, listen: false).token);
-                }
-              ),
+          // buildListTile(
+          //     'My Files',
+          //     Icons.list,
+          //     // () => Navigator.of(context).pushReplacementNamed('/Orders'),
+          //     () async {
+          //     print(Provider.of<Auth>(context, listen: false).token);
+          //       }
+          //     ),
           buildListTile(
             'Log Out',
             Icons.exit_to_app,

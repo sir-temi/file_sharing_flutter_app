@@ -14,8 +14,7 @@ import '../providers/auth.dart';
 import '../providers/files.dart';
 import '../widgets/loading.dart';
 import '../widgets/detail_rows.dart';
-
-
+import 'package:flutter/services.dart';
 
 class FileDetailScreen extends StatefulWidget {
   const FileDetailScreen({Key? key}) : super(key: key);
@@ -43,12 +42,13 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
   void initState() {
     super.initState();
 
-    IsolateNameServer.registerPortWithName(_port.sendPort, 'downloader_send_port');
+    IsolateNameServer.registerPortWithName(
+        _port.sendPort, 'downloader_send_port');
     _port.listen((dynamic data) {
       String id = data[0];
       DownloadTaskStatus status = data[1];
       int progress = data[2];
-      setState((){ });
+      setState(() {});
     });
 
     FlutterDownloader.registerCallback(downloadCallback);
@@ -60,12 +60,13 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
     super.dispose();
   }
 
-
-  static void downloadCallback(String id, DownloadTaskStatus status, int progress) {
-    final SendPort? send = IsolateNameServer.lookupPortByName('downloader_send_port');
+  static void downloadCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    final SendPort? send =
+        IsolateNameServer.lookupPortByName('downloader_send_port');
     send!.send([id, status, progress]);
   }
-
+  
 
   void didChangeDependencies() {
     if (!_isInit) {
@@ -84,7 +85,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
         result = response;
         byCountry = response['data']['restrictedCountry'];
         byUser = response['data']['restrictedUser'];
-        isUser = result['isUser'];
+        isUser = response['isUser'];
         title = response['data']['title'];
 
         setState(() {
@@ -92,104 +93,177 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
         });
       });
 
-      _isInit = true;
+      // _isInit = true;
     }
     super.didChangeDependencies();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
     final fontSize = MediaQuery.of(context).textScaleFactor;
     final PreferredSizeWidget appBar = AppBar(
-      title:
-          Text(title),
-      actions: [
+      title: Text(title),
+      actions: isUser
+      ? [
+        GestureDetector(
+            onLongPress: () => showDialog(
+                context: context,
+                builder: (ctx) => SimpleDialog(
+                      title: const Text('File number',),
+                      children: <Widget>[
+                        SimpleDialogOption(
+                          onPressed: () { 
+                            Clipboard.setData(ClipboardData(text: result['data']['identifier'].toUpperCase()));
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(
+                                  backgroundColor:
+                                      Theme.of(context)
+                                          .primaryColor,
+                                  elevation: 8.0,
+                                  content: Text(
+                                    'Copied to clipboard',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight:
+                                            FontWeight.bold),
+                                  )));
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text( result['data']['identifier'].toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSize * 26,
+                                    color: Theme.of(context).primaryColor,
+                                  )),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                alignment: Alignment.center,
+                                child: FaIcon(
+                                  FontAwesomeIcons.solidCopy,
+                                  color: Theme.of(context).primaryColorDark,
+                                  size: fontSize * 28,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+            child: Icon(Icons.info_outlined)),
         IconButton(
           icon: Icon(Icons.share_rounded),
           onPressed: () {
             showDialog(
-              context: context,
-              builder: (ctx) => SimpleDialog(
-                title: const Text('Share File',),
-                children: <Widget>[
-                  SimpleDialogOption(
-                    onPressed: () { 
-                      SocialShare.shareWhatsapp(
-                        "Download this file from TemiShare \n ${result['data']['file']}"
-                        );
-                      },
-                    child: Row(
-                      children: [
-                        FaIcon(FontAwesomeIcons.whatsapp, 
-                        color: Color.fromRGBO(37, 211, 102, 1), 
-                        size: fontSize * 28,
+                context: context,
+                builder: (ctx) => SimpleDialog(
+                      title: const Text(
+                        'Share File',
+                      ),
+                      children: <Widget>[
+                        SimpleDialogOption(
+                          onPressed: () {
+                            SocialShare.shareWhatsapp(
+                                "Download this file from TemiShare \n ${result['data']['file']}");
+                          },
+                          child: Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.whatsapp,
+                                color: Color.fromRGBO(37, 211, 102, 1),
+                                size: fontSize * 28,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(' Share via WhatsApp',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSize * 17,
+                                  ))
+                            ],
+                          ),
                         ),
-                        SizedBox(width: 5,),
-                        Text(' Share via WhatsApp', style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: fontSize * 17,
-                        ))
-                      ],
-                    ),
-                  ),
-                  SimpleDialogOption(
-                    onPressed: () { 
-                      SocialShare.shareTwitter(
-                              "Download this file from TemiShare",
-                              url:result['data']['file']);
-                      },
-                    child: Row(
-                      children: [
-                        FaIcon(FontAwesomeIcons.twitter, 
-                        color: Color.fromRGBO(29, 161, 242, 1), 
-                        size: fontSize * 28,),
-                        SizedBox(width: 5,),
-                        Text(' Share via Twitter', style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: fontSize * 17,
-                        ))
-                      ],
-                    ),
-                  ),
-                  SimpleDialogOption(
-                    onPressed: () { 
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed('/search_user', arguments: result['data']['identifier']);
-                      },
-                    child: Row(
-                      children: [
-                        FaIcon(FontAwesomeIcons.userAlt, color: Theme.of(context).primaryColorDark, size: fontSize * 25),
-                        SizedBox(width: 5,),
-                        Text(' Share via Username', style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: fontSize * 17,
+                        SimpleDialogOption(
+                          onPressed: () {
+                            SocialShare.shareTwitter(
+                                "Download this file from TemiShare",
+                                url: result['data']['file']);
+                          },
+                          child: Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.twitter,
+                                color: Color.fromRGBO(29, 161, 242, 1),
+                                size: fontSize * 28,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(' Share via Twitter',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSize * 17,
+                                  ))
+                            ],
+                          ),
                         ),
-                        )
+                        SimpleDialogOption(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushNamed('/search_user',
+                                arguments: result['data']['identifier']);
+                          },
+                          child: Row(
+                            children: [
+                              FaIcon(FontAwesomeIcons.userAlt,
+                                  color: Theme.of(context).primaryColorDark,
+                                  size: fontSize * 25),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                ' Share via Username',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSize * 17,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ],
-              )
-            );
-          }, 
-          ),
-        BackButton(onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false)),
-      ],
+                    ));
+          },
+        ),
+        BackButton(
+            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                '/dashboard', (Route<dynamic> route) => false)),
+      ]
+      : [
+        BackButton(
+            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                '/dashboard', (Route<dynamic> route) => false)),
+      ]
+      ,
     );
     final screensize = MediaQuery.of(context).size;
     final appBarheight = appBar.preferredSize.height;
     final batterybar = MediaQuery.of(context).padding.top;
     final screenSize = screensize.height - (appBarheight + batterybar);
     final userName = Provider.of<Auth>(context, listen: false).userName;
-    
-
-    
 
     return Scaffold(
       appBar: appBar,
       drawer: DrawerMenu(userName),
       body: _isLoading
-          ? Loading('Loading')
+          ? Loading('Loading...')
           : result['message'] == false
               ? Center(
                   child: Container(
@@ -243,14 +317,12 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                         ),
                         SizedBox(height: 7),
                         Container(
-                          child: Text(
-                            result['data']['description'],
-                            style: TextStyle(
-                              fontSize: fontSize * 16,
-                              fontWeight: FontWeight.w800,
-                              // color: Theme.of(context).primaryColor
-                              )
-                          ),
+                          child: Text(result['data']['description'],
+                              style: TextStyle(
+                                fontSize: fontSize * 16,
+                                fontWeight: FontWeight.w800,
+                                // color: Theme.of(context).primaryColor
+                              )),
                         ),
                         SizedBox(height: 10),
                         Container(
@@ -258,7 +330,8 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                           child: Card(
                               elevation: 7,
                               child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 20),
                                 child: Column(children: [
                                   DetailRows(fontSize, [
                                     result['data']['downloaded'],
@@ -300,7 +373,8 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                           children: [
                                             SizedBox(height: screenSize * .03),
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
                                               children: [
                                                 Text(
                                                   'Restricted by country',
@@ -312,20 +386,28 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                 ),
                                                 SizedBox(width: 5),
                                                 Switch(
-                                                  value: byCountry, 
-                                                  activeColor: Theme.of(context).primaryColorDark,
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      Provider.of<Files>(context, listen: false).setRestrictedUser('by_country', result['data']['identifier']);
-                                                      byCountry = value;
-                                                    });
-                                                  }
-                                                  )
+                                                    value: byCountry,
+                                                    activeColor:
+                                                        Theme.of(context)
+                                                            .primaryColorDark,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        Provider.of<Files>(
+                                                                context,
+                                                                listen: false)
+                                                            .setRestrictedUser(
+                                                                'by_country',
+                                                                result['data'][
+                                                                    'identifier']);
+                                                        byCountry = value;
+                                                      });
+                                                    })
                                               ],
                                             ),
                                             SizedBox(height: screenSize * .03),
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
                                               children: [
                                                 Text(
                                                   'Restricted by user',
@@ -337,16 +419,23 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                 ),
                                                 SizedBox(width: 5),
                                                 Switch(
-                                                  value: byUser, 
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      Provider.of<Files>(context, listen: false).setRestrictedUser('by_user', result['data']['identifier']);
-                                                      byUser = value;
-                                                    });
-                                                  },
-                                                  // activeTrackColor: Colors.yellow,
-                                                  activeColor: Theme.of(context).primaryColorDark
-                                                  )
+                                                    value: byUser,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        Provider.of<Files>(
+                                                                context,
+                                                                listen: false)
+                                                            .setRestrictedUser(
+                                                                'by_user',
+                                                                result['data'][
+                                                                    'identifier']);
+                                                        byUser = value;
+                                                      });
+                                                    },
+                                                    // activeTrackColor: Colors.yellow,
+                                                    activeColor:
+                                                        Theme.of(context)
+                                                            .primaryColorDark)
                                               ],
                                             ),
                                           ],
@@ -372,85 +461,82 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                   ),
                   onPressed: () {
                     showDialog(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                          title: Text('Please Confirm',
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark,
-                                                  fontWeight: FontWeight.bold)),
-                                          content: Text(
-                                            'Are you sure you want to delete this file?',
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          actions: <Widget>[
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                              children: <Widget>[
-                                                RaisedButton(
-                                                  padding: EdgeInsets.all(10),
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
-                                                  child: Text('No',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.white)),
-                                                  onPressed: () =>
-                                                      Navigator.of(context)
-                                                          .pop(),
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                ),
-                                                SizedBox(width: 5),
-                                                RaisedButton(
-                                                  padding: EdgeInsets.all(10),
-                                                  color: Colors.red,
-                                                  child: Text('Delete',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.white)),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      _isLoading = true;
-                                                    });
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                              title: Text('Please Confirm',
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColorDark,
+                                      fontWeight: FontWeight.bold)),
+                              content: Text(
+                                'Are you sure you want to delete this file?',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              actions: <Widget>[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    RaisedButton(
+                                      padding: EdgeInsets.all(10),
+                                      color: Theme.of(context).primaryColor,
+                                      child: Text('No',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                    ),
+                                    SizedBox(width: 5),
+                                    RaisedButton(
+                                      padding: EdgeInsets.all(10),
+                                      color: Colors.red,
+                                      child: Text('Delete',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isLoading = true;
+                                        });
 
-                                                    Provider.of<Files>(context,
-                                                            listen: false)
-                                                        .deleteFile(
-                                                            result['data']['identifier'])
-                                                        .then((value) {
-                                                      Navigator.of(context)
-                                                          .pushReplacementNamed(
-                                                              '/dashboard');
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(SnackBar(
-                                                              backgroundColor: Theme.of(context).primaryColor,
-                                                              elevation: 8.0,
-                                                              content: Text(
-                                                                  'File Deleted',
-                                                                  style: TextStyle(color: Colors.white, fontWeight:FontWeight.bold ),
-                                                                  )));
-                                                    });
-                                                  },
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ));
-                  }
-                  ),
+                                        Provider.of<Files>(context,
+                                                listen: false)
+                                            .deleteFile(
+                                                result['data']['identifier'])
+                                            .then((value) {
+                                          Navigator.of(context)
+                                              .pushReplacementNamed(
+                                                  '/dashboard');
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  backgroundColor:
+                                                      Theme.of(context)
+                                                          .primaryColor,
+                                                  elevation: 8.0,
+                                                  content: Text(
+                                                    'File Deleted',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )));
+                                        });
+                                      },
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ));
+                  }),
             )
           : Container(
               margin: EdgeInsets.only(bottom: 40),
@@ -462,37 +548,33 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                     size: fontSize * 35,
                     color: Colors.white,
                   ),
-                onPressed: () async{
-                  final status = await Permission.storage.request();
-                  if (status.isGranted){
+                  onPressed: () async {
+                    final status = await Permission.storage.request();
+                    if (status.isGranted) {
+                      setState(() {
+                        _isLoading = true;
 
-                  setState(() {
-                    _isLoading = true;
-
-                     Provider.of<Files>(context, listen: false)
-                    .downloadFile(result['data']['identifier'], result['data']['mimeType']);
-                    _isLoading = false;
-                    Navigator.of(context).pushNamed('/download', arguments: result['data']['identifier']);
-                  });
-
-
-                  } else{
-
-                    print('Permission denied');
-                    Navigator.of(context).pop();
-
-                  }
-                  // setState(() {
-                  //   _isLoading = true;
-                  // });
-                  // final taskId = await FlutterDownloader.enqueue(
-                  //   url: result['data']['file'],
-                  //   savedDir: 'the path of directory where you want to save downloaded files',
-                  //   showNotification: true, // show download progress in status bar (for Android)
-                  //   openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-                  // );
-                  
-                }),
+                        Provider.of<Files>(context, listen: false).downloadFile(
+                            result['data']['identifier'],
+                            result['data']['mimeType']);
+                        _isLoading = false;
+                        Navigator.of(context).pushNamed('/download',
+                            arguments: result['data']['identifier']);
+                      });
+                    } else {
+                      print('Permission denied');
+                      Navigator.of(context).pop();
+                    }
+                    // setState(() {
+                    //   _isLoading = true;
+                    // });
+                    // final taskId = await FlutterDownloader.enqueue(
+                    //   url: result['data']['file'],
+                    //   savedDir: 'the path of directory where you want to save downloaded files',
+                    //   showNotification: true, // show download progress in status bar (for Android)
+                    //   openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+                    // );
+                  }),
             ),
     );
   }
