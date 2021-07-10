@@ -103,46 +103,42 @@ class Files with ChangeNotifier {
     return _userFiles.length;
   }
 
-
   Future<Map> getFileDetails(String identifier, String? userAccessing) async {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
 
-    try {
-      if (userAccessing == userName) {
-        final response = await http.get(url, headers: {
-          'Authorization': 'Bearer $authToken',
-        });
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
 
-        if (response.statusCode == 404) {
-          throw ('This file is not available.');
-        } else if (response.statusCode == 200) {
-          final file = json.decode(response.body)['data'];
-          return {
-            'message': true,
-            'isUser': true,
-            'alert': 'null',
-            'data': {
-              'authorisedUser': file['authorised_user'],
-              'description': file['description'],
-              'downloaded': file['downloaded'],
-              'file': 'http://10.0.2.2:8000' + file['file'],
-              'fileOwner': file['owner'],
-              'identifier': file['identifier'],
-              'location': file['location'],
-              'mimeType': file['mime_type'],
-              'restrictedCountry': file['restricted_by_country'],
-              'restrictedUser': file['restricted_by_user'],
-              'size_mb': file['size_mb'],
-              'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
-              'title': file['title'],
-              'uploadedDate': DateTime.parse(file['uploaded_date'])
-            }
-          };
-        }
+    if (response.statusCode == 200) {
+      final file = json.decode(response.body)['data'];
+      // try {
+      if (userAccessing == file['owner']['username']) {
+        return {
+          'message': true,
+          'isUser': true,
+          'alert': 'null',
+          'data': {
+            'authorisedUser': file['authorised_user'],
+            'description': file['description'],
+            'downloaded': file['downloaded'],
+            'file': 'http://10.0.2.2:8000' + file['file'],
+            'fileOwner': file['owner'],
+            'identifier': file['identifier'],
+            'location': file['location'],
+            'mimeType': file['mime_type'],
+            'restrictedCountry': file['restricted_by_country'],
+            'restrictedUser': file['restricted_by_user'],
+            'size_mb': file['size_mb'],
+            'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
+            'title': file['title'],
+            'uploadedDate': DateTime.parse(file['uploaded_date'])
+          }
+        };
       } else {
         final res = await http.get(Uri.parse('http://ip-api.com/json'));
         final country = json.decode(res.body)['country'].toString();
-        String identity = identifier+'-'+country;
+        String identity = identifier + '-' + country;
         final response = await http.get(
           Uri.parse('http://10.0.2.2:8000/api/v1/files/$identity/'),
           headers: {
@@ -162,18 +158,29 @@ class Files with ChangeNotifier {
           return {
             'message': true,
             'isUser': false,
-            'data': file,
+            'data': {
+                    'authorisedUser': file['authorised_user'],
+                    'description': file['description'],
+                    'downloaded': file['downloaded'],
+                    'file': 'http://10.0.2.2:8000' + file['file'],
+                    'fileOwner': file['owner'],
+                    'identifier': file['identifier'],
+                    'location': file['location'],
+                    'mimeType': file['mime_type'],
+                    'restrictedCountry': file['restricted_by_country'],
+                    'restrictedUser': file['restricted_by_user'],
+                    'size_mb': file['size_mb'],
+                    'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
+                    'title': file['title'],
+                    'uploadedDate': DateTime.parse(file['uploaded_date'])
+                  },
             'alert': 'null'
           };
         }
       }
-    } catch (e) {
-      throw (e);
     }
     throw ('ERROR');
   }
-
-
 
   Future<void> fetchAndSetFiles() async {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
@@ -218,18 +225,14 @@ class Files with ChangeNotifier {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
 
     try {
-
-      final response = await http.put(
-          url,
+      final response = await http.put(url,
           headers: {'Authorization': 'Bearer $authToken'},
-          body: {'category': category}
-          );
+          body: {'category': category});
       if (response.statusCode != 200) {
         throw ('ERROR');
       }
 
       notifyListeners();
-
     } catch (e) {
       throw (e);
     }
@@ -239,125 +242,114 @@ class Files with ChangeNotifier {
     final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
 
     try {
-      final response = await http.delete(url,
-          headers: {'Authorization': 'Bearer $authToken'},
-          );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
       if (response.statusCode != 200) {
         throw ('ERROR');
       }
       _userFiles.removeWhere((e) => e.identifier == identifier);
       notifyListeners();
     } catch (e) {
-
       throw (e);
-
     }
   }
 
-  
   Future<void> downloadFile(String identifier, String mimeType) async {
-        final res = await http.get(Uri.parse('http://ip-api.com/json'));
-        final country = json.decode(res.body)['country'].toString();
-        String identity = identifier+'-'+country;
+    final res = await http.get(Uri.parse('http://ip-api.com/json'));
+    final country = json.decode(res.body)['country'].toString();
+    String identity = identifier + '-' + country;
 
-        final dirs = await getExternalStorageDirectories();
-        final path = dirs![0].path;
-        final file = File('$path/yuy87.png');
-        print(dirs);
-        print(path);
-        print(file.path);
-        final status = await Permission.storage.status;
-        print('Status $status');
-          
-          final url = 'http://10.0.2.2:8000/api/v1/files/download/$identity/';
+    final dirs = await getExternalStorageDirectories();
+    final path = dirs![0].path;
+    final file = File('$path/yuy87.png');
+    print(dirs);
+    print(path);
+    print(file.path);
+    final status = await Permission.storage.status;
+    print('Status $status');
 
-          try{
+    final url = 'http://10.0.2.2:8000/api/v1/files/download/$identity/';
 
-          final taskId = await FlutterDownloader.enqueue(
-            url: url,
-            headers: {'Authorization': 'Bearer $authToken'},
-            savedDir: path,
-            showNotification: true, // show download progress in status bar (for Android)
-            openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-          );
-            notifyListeners();
-          }catch(e){
-            throw(e);
-          }
+    try {
+      final taskId = await FlutterDownloader.enqueue(
+        url: url,
+        headers: {'Authorization': 'Bearer $authToken'},
+        savedDir: path,
+        showNotification:
+            true, // show download progress in status bar (for Android)
+        openFileFromNotification:
+            true, // click on notification to open downloaded file (for Android)
+      );
+      notifyListeners();
+    } catch (e) {
+      throw (e);
+    }
+  }
 
+  Future<List> validateUser(String username) async {
+    final url = 'http://10.0.2.2:8000/api/v1/validateuser/$username/';
 
+    final response = await http
+        .get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
 
+    if (response.statusCode == 404) {
+      return [false];
     }
 
-    Future<List> validateUser(String username) async{
-      final url = 'http://10.0.2.2:8000/api/v1/validateuser/$username/';
+    return [true, json.decode(response.body)['first_name']];
+  }
 
-      final response = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+  Future<bool> validateFile(String identifier) async {
+    print(identifier);
+    final url = 'http://10.0.2.2:8000/api/v1/files/validatefile/$identifier/';
 
-      if (response.statusCode == 404){
-        return [false];
-      }
+    final response = await http
+        .get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
 
-      return [true, json.decode(response.body)['first_name']];
-
-    }
-
-    Future<bool> validateFile(String identifier) async{
-      print(identifier);
-      final url = 'http://10.0.2.2:8000/api/v1/files/validatefile/$identifier/';
-
-      final response = await http.get(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
-
-      if (response.statusCode == 404){
-        return false;
-      }
-
-      return true;
-
-    }
-
-
-
-  Future<bool> uploadFile(Map data, File? file, String name) async{
-
-      final res = await http.get(Uri.parse('http://ip-api.com/json'));
-      final country = json.decode(res.body)['country'].toString();
-     
-      
-      var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
-      var request = http.MultipartRequest('POST', uri);
-      request.headers['Authorization'] = 'Bearer $authToken';
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'file',
-          file!.path
-        )
-        );
-      request.fields['title'] = data['title'];
-      request.fields['title'] = data['title'];
-      request.fields['description'] = data['description'];
-      request.fields['authorised_user'] = data['username'];
-      request.fields['file_name'] = name;
-      request.fields['mb'] = filesize(file.lengthSync(), 1);
-      request.fields['bytes'] = file.lengthSync().toString();
-      request.fields['location'] = country;
-      request.fields['restricted_by_user'] = data['restrictedUser'] ?"true" :"false";
-      request.fields['restricted_by_country'] = data['restrictedCountry'] ?"true" :"false";
-      // var response = await request.send();
-
-      final StreamedResponse response = await Client().send(request);
-
-      if(response.statusCode == 201){
-        return true;
-      }
+    if (response.statusCode == 404) {
       return false;
-
     }
 
-    Future<void> shareFile(String username, String identifier) async{
-      final url = 'http://10.0.2.2:8000/api/v1/files/share_file/$username/$identifier/';
+    return true;
+  }
 
-      await http.post(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+  Future<bool> uploadFile(Map data, File? file, String name) async {
+    final res = await http.get(Uri.parse('http://ip-api.com/json'));
+    final country = json.decode(res.body)['country'].toString();
+
+    var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
+    var request = http.MultipartRequest('POST', uri);
+    request.headers['Authorization'] = 'Bearer $authToken';
+    request.files.add(await http.MultipartFile.fromPath('file', file!.path));
+    request.fields['title'] = data['title'];
+    request.fields['title'] = data['title'];
+    request.fields['description'] = data['description'];
+    request.fields['authorised_user'] = data['username'];
+    request.fields['file_name'] = name;
+    request.fields['mb'] = filesize(file.lengthSync(), 1);
+    request.fields['bytes'] = file.lengthSync().toString();
+    request.fields['location'] = country;
+    request.fields['restricted_by_user'] =
+        data['restrictedUser'] ? "true" : "false";
+    request.fields['restricted_by_country'] =
+        data['restrictedCountry'] ? "true" : "false";
+    // var response = await request.send();
+
+    final StreamedResponse response = await Client().send(request);
+
+    if (response.statusCode == 201) {
+      return true;
     }
+    return false;
+  }
 
+  Future<void> shareFile(String username, String identifier) async {
+    final url =
+        'http://10.0.2.2:8000/api/v1/files/share_file/$username/$identifier/';
+
+    await http
+        .post(Uri.parse(url), headers: {'Authorization': 'Bearer $authToken'});
+  }
 }

@@ -80,7 +80,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
 
       Provider.of<Files>(context, listen: false)
           .getFileDetails(identifier, userAccessing)
-          .catchError((e) {})
+          .catchError((e) {throw(e);})
           .then((response) {
         result = response;
         byCountry = response['data']['restrictedCountry'];

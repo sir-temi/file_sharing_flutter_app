@@ -1,4 +1,3 @@
-import 'package:cemfrontend/classes/search_bar.dart';
 import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/widgets/drawer.dart';
 import 'package:cemfrontend/widgets/loading.dart';
@@ -193,9 +192,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: Text('My Dashboard'),
       actions: [
         IconButton(
-          onPressed: () => Navigator.of(context).pushNamed('/search_file'),
+            onPressed: () => Navigator.of(context).pushNamed('/search_file'),
             icon: Icon(Icons.search))
-          // icon: AnimatedIcon(icon: ,progress: ),
+        // icon: AnimatedIcon(icon: ,progress: ),
       ],
     );
     final screensize = MediaQuery.of(context).size;
