@@ -111,9 +111,10 @@ class Files with ChangeNotifier {
     });
 
     if (response.statusCode == 200) {
-      final file = json.decode(response.body)['data'];
+      final file = json.decode(response.body)[0];
       // try {
       if (userAccessing == file['owner']['username']) {
+        print(file);
         return {
           'message': true,
           'isUser': true,
@@ -154,26 +155,26 @@ class Files with ChangeNotifier {
             'data': 'null'
           };
         } else if (response.statusCode == 200) {
-          Map file = json.decode(response.body)['data'];
+          Map file = json.decode(response.body);
           return {
             'message': true,
             'isUser': false,
             'data': {
-                    'authorisedUser': file['authorised_user'],
-                    'description': file['description'],
-                    'downloaded': file['downloaded'],
-                    'file': 'http://10.0.2.2:8000' + file['file'],
-                    'fileOwner': file['owner'],
-                    'identifier': file['identifier'],
-                    'location': file['location'],
-                    'mimeType': file['mime_type'],
-                    'restrictedCountry': file['restricted_by_country'],
-                    'restrictedUser': file['restricted_by_user'],
-                    'size_mb': file['size_mb'],
-                    'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
-                    'title': file['title'],
-                    'uploadedDate': DateTime.parse(file['uploaded_date'])
-                  },
+              'authorisedUser': file['authorised_user'],
+              'description': file['description'],
+              'downloaded': file['downloaded'],
+              'file': 'http://10.0.2.2:8000' + file['file'],
+              'fileOwner': file['owner'],
+              'identifier': file['identifier'],
+              'location': file['location'],
+              'mimeType': file['mime_type'],
+              'restrictedCountry': file['restricted_by_country'],
+              'restrictedUser': file['restricted_by_user'],
+              'size_mb': file['size_mb'],
+              'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
+              'title': file['title'],
+              'uploadedDate': DateTime.parse(file['uploaded_date'])
+            },
             'alert': 'null'
           };
         }
@@ -191,7 +192,7 @@ class Files with ChangeNotifier {
       if (response.statusCode == 401) {
         throw ('This file is not available.');
       } else if (response.statusCode == 200) {
-        List<dynamic> files = json.decode(response.body)['data'];
+        List<dynamic> files = json.decode(response.body);
         if (files.length < 1) {
           return;
         }

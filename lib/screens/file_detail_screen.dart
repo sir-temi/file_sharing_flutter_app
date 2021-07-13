@@ -66,7 +66,6 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
         IsolateNameServer.lookupPortByName('downloader_send_port');
     send!.send([id, status, progress]);
   }
-  
 
   void didChangeDependencies() {
     if (!_isInit) {
@@ -80,8 +79,9 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
 
       Provider.of<Files>(context, listen: false)
           .getFileDetails(identifier, userAccessing)
-          .catchError((e) {throw(e);})
-          .then((response) {
+          .catchError((e) {
+        throw (e);
+      }).then((response) {
         result = response;
         byCountry = response['data']['restrictedCountry'];
         byUser = response['data']['restrictedUser'];
@@ -98,160 +98,166 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
     super.didChangeDependencies();
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     final fontSize = MediaQuery.of(context).textScaleFactor;
     final PreferredSizeWidget appBar = AppBar(
       title: Text(title),
       actions: isUser
-      ? [
-        GestureDetector(
-            onLongPress: () => showDialog(
-                context: context,
-                builder: (ctx) => SimpleDialog(
-                      title: const Text('File number',),
-                      children: <Widget>[
-                        SimpleDialogOption(
-                          onPressed: () { 
-                            Clipboard.setData(ClipboardData(text: result['data']['identifier'].toUpperCase()));
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(
-                                  backgroundColor:
-                                      Theme.of(context)
-                                          .primaryColor,
-                                  elevation: 8.0,
-                                  content: Text(
-                                    'Copied to clipboard',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight:
-                                            FontWeight.bold),
-                                  )));
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text( result['data']['identifier'].toUpperCase(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontSize * 26,
-                                    color: Theme.of(context).primaryColor,
-                                  )),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Container(
-                                alignment: Alignment.center,
-                                child: FaIcon(
-                                  FontAwesomeIcons.solidCopy,
-                                  color: Theme.of(context).primaryColorDark,
-                                  size: fontSize * 28,
+          ? [
+              GestureDetector(
+                  onLongPress: () => showDialog(
+                      context: context,
+                      builder: (ctx) => SimpleDialog(
+                            title: const Text(
+                              'File number',
+                            ),
+                            children: <Widget>[
+                              SimpleDialogOption(
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(
+                                      text: result['data']['identifier']
+                                          .toUpperCase()));
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          backgroundColor:
+                                              Theme.of(context).primaryColor,
+                                          elevation: 8.0,
+                                          content: Text(
+                                            'Copied to clipboard',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          )));
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                        result['data']['identifier']
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSize * 26,
+                                          color: Theme.of(context).primaryColor,
+                                        )),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      child: FaIcon(
+                                        FontAwesomeIcons.solidCopy,
+                                        color:
+                                            Theme.of(context).primaryColorDark,
+                                        size: fontSize * 28,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      ],
-                    )),
-            child: Icon(Icons.info_outlined)),
-        IconButton(
-          icon: Icon(Icons.share_rounded),
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (ctx) => SimpleDialog(
-                      title: const Text(
-                        'Share File',
-                      ),
-                      children: <Widget>[
-                        SimpleDialogOption(
-                          onPressed: () {
-                            SocialShare.shareWhatsapp(
-                                "Download this file from TemiShare \n ${result['data']['file']}");
-                          },
-                          child: Row(
-                            children: [
-                              FaIcon(
-                                FontAwesomeIcons.whatsapp,
-                                color: Color.fromRGBO(37, 211, 102, 1),
-                                size: fontSize * 28,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(' Share via WhatsApp',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontSize * 17,
-                                  ))
-                            ],
-                          ),
-                        ),
-                        SimpleDialogOption(
-                          onPressed: () {
-                            SocialShare.shareTwitter(
-                                "Download this file from TemiShare",
-                                url: result['data']['file']);
-                          },
-                          child: Row(
-                            children: [
-                              FaIcon(
-                                FontAwesomeIcons.twitter,
-                                color: Color.fromRGBO(29, 161, 242, 1),
-                                size: fontSize * 28,
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(' Share via Twitter',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontSize * 17,
-                                  ))
-                            ],
-                          ),
-                        ),
-                        SimpleDialogOption(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pushNamed('/search_user',
-                                arguments: result['data']['identifier']);
-                          },
-                          child: Row(
-                            children: [
-                              FaIcon(FontAwesomeIcons.userAlt,
-                                  color: Theme.of(context).primaryColorDark,
-                                  size: fontSize * 25),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                ' Share via Username',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: fontSize * 17,
+                          )),
+                  child: Icon(Icons.info_outlined)),
+              IconButton(
+                icon: Icon(Icons.share_rounded),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (ctx) => SimpleDialog(
+                            title: const Text(
+                              'Share File',
+                            ),
+                            children: <Widget>[
+                              SimpleDialogOption(
+                                onPressed: () {
+                                  SocialShare.shareWhatsapp(
+                                      "Download this file from TemiShare \n ${result['data']['file']}");
+                                },
+                                child: Row(
+                                  children: [
+                                    FaIcon(
+                                      FontAwesomeIcons.whatsapp,
+                                      color: Color.fromRGBO(37, 211, 102, 1),
+                                      size: fontSize * 28,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(' Share via WhatsApp',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSize * 17,
+                                        ))
+                                  ],
                                 ),
-                              )
+                              ),
+                              SimpleDialogOption(
+                                onPressed: () {
+                                  SocialShare.shareTwitter(
+                                      "Download this file from TemiShare",
+                                      url: result['data']['file']);
+                                },
+                                child: Row(
+                                  children: [
+                                    FaIcon(
+                                      FontAwesomeIcons.twitter,
+                                      color: Color.fromRGBO(29, 161, 242, 1),
+                                      size: fontSize * 28,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(' Share via Twitter',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSize * 17,
+                                        ))
+                                  ],
+                                ),
+                              ),
+                              SimpleDialogOption(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pushNamed(
+                                      '/search_user',
+                                      arguments: result['data']['identifier']);
+                                },
+                                child: Row(
+                                  children: [
+                                    FaIcon(FontAwesomeIcons.userAlt,
+                                        color:
+                                            Theme.of(context).primaryColorDark,
+                                        size: fontSize * 25),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      ' Share via Username',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: fontSize * 17,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
-                          ),
-                        ),
-                      ],
-                    ));
-          },
-        ),
-        BackButton(
-            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-                '/dashboard', (Route<dynamic> route) => false)),
-      ]
-      : [
-        BackButton(
-            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-                '/dashboard', (Route<dynamic> route) => false)),
-      ]
-      ,
+                          ));
+                },
+              ),
+              BackButton(
+                  onPressed: () => Navigator.of(context)
+                      .pushNamedAndRemoveUntil(
+                          '/dashboard', (Route<dynamic> route) => false)),
+            ]
+          : [
+              BackButton(
+                  onPressed: () => Navigator.of(context)
+                      .pushNamedAndRemoveUntil(
+                          '/dashboard', (Route<dynamic> route) => false)),
+            ],
     );
     final screensize = MediaQuery.of(context).size;
     final appBarheight = appBar.preferredSize.height;
@@ -359,8 +365,8 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                       ),
                                       SizedBox(width: 5),
                                       Text(
-                                        DateFormat.yMMMd()
-                                            .format(DateTime.now()),
+                                        DateFormat.yMMMd().format(
+                                            result['data']['uploadedDate']),
                                         style: TextStyle(
                                             // color: Colors.grey,
                                             fontSize: fontSize * 25,
@@ -369,76 +375,86 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                     ],
                                   ),
                                   result['isUser']
-                                      ? Column(
-                                          children: [
-                                            SizedBox(height: screenSize * .03),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  'Restricted by country',
-                                                  style: TextStyle(
-                                                      // color: Colors.grey,
-                                                      fontSize: fontSize * 20,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Switch(
-                                                    value: byCountry,
-                                                    activeColor:
-                                                        Theme.of(context)
-                                                            .primaryColorDark,
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        Provider.of<Files>(
-                                                                context,
-                                                                listen: false)
-                                                            .setRestrictedUser(
-                                                                'by_country',
-                                                                result['data'][
-                                                                    'identifier']);
-                                                        byCountry = value;
-                                                      });
-                                                    })
-                                              ],
-                                            ),
-                                            SizedBox(height: screenSize * .03),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  'Restricted by user',
-                                                  style: TextStyle(
-                                                      // color: Colors.grey,
-                                                      fontSize: fontSize * 20,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Switch(
-                                                    value: byUser,
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        Provider.of<Files>(
-                                                                context,
-                                                                listen: false)
-                                                            .setRestrictedUser(
-                                                                'by_user',
-                                                                result['data'][
-                                                                    'identifier']);
-                                                        byUser = value;
-                                                      });
-                                                    },
-                                                    // activeTrackColor: Colors.yellow,
-                                                    activeColor:
-                                                        Theme.of(context)
-                                                            .primaryColorDark)
-                                              ],
-                                            ),
-                                          ],
+                                      ? Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 4),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                  height: screenSize * .03),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Restricted by country',
+                                                    style: TextStyle(
+                                                        // color: Colors.grey,
+                                                        fontSize: fontSize * 20,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Switch(
+                                                      value: byCountry,
+                                                      activeColor:
+                                                          Theme.of(context)
+                                                              .primaryColorDark,
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          Provider.of<Files>(
+                                                                  context,
+                                                                  listen: false)
+                                                              .setRestrictedUser(
+                                                                  'by_country',
+                                                                  result['data']
+                                                                      [
+                                                                      'identifier']);
+                                                          byCountry = value;
+                                                        });
+                                                      })
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  height: screenSize * .03),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Restricted by user',
+                                                    style: TextStyle(
+                                                        // color: Colors.grey,
+                                                        fontSize: fontSize * 20,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Switch(
+                                                      value: byUser,
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          Provider.of<Files>(
+                                                                  context,
+                                                                  listen: false)
+                                                              .setRestrictedUser(
+                                                                  'by_user',
+                                                                  result['data']
+                                                                      [
+                                                                      'identifier']);
+                                                          byUser = value;
+                                                        });
+                                                      },
+                                                      // activeTrackColor: Colors.yellow,
+                                                      activeColor:
+                                                          Theme.of(context)
+                                                              .primaryColorDark)
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         )
                                       : Container()
                                 ]),

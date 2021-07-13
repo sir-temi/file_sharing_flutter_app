@@ -4,6 +4,7 @@ import 'package:cemfrontend/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../main.dart';
 import '../widgets/drawer.dart';
@@ -416,14 +417,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   fit: BoxFit.fill,
                                                 ),
                                               ),
-                                              title: Text(
-                                                files[i].title,
-                                                style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .primaryColorDark,
-                                                    fontSize: fontsize * 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                              title: Row(
+                                                children: [
+                                                  Text(
+                                                    files[i].title,
+                                                    style: TextStyle(
+                                                        color: Theme.of(context)
+                                                            .primaryColorDark,
+                                                        fontSize: fontsize * 18,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(""),
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.download_rounded,
+                                                        color: Theme.of(context)
+                                                            .primaryColor,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 2,
+                                                      ),
+                                                      Text(
+                                                        files[i]
+                                                            .downloaded
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.grey,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize:
+                                                                fontsize * 18),
+                                                      ),
+                                                    ],
+                                                  )
+                                                ],
                                               ),
                                               subtitle: Container(
                                                 width: double.infinity,
@@ -434,42 +465,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Expanded(
+                                                        flex: 2,
                                                         child: Text(
-                                                      '${files[i].mimeType.split("/")[0][0].toUpperCase()}${files[i].mimeType.split("/")[0].substring(1)}',
-                                                      style: TextStyle(
-                                                          color: Colors.grey,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize:
-                                                              fontsize * 16),
-                                                    )),
-                                                    Expanded(
-                                                        child: Text(
-                                                      files[i].sizeMb,
-                                                      style: TextStyle(
-                                                          color: Colors.grey,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize:
-                                                              fontsize * 17),
-                                                    )),
-                                                    Expanded(
-                                                        child: Row(
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .download_rounded,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .primaryColor,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 2,
-                                                        ),
-                                                        Text(
-                                                          files[i]
-                                                              .downloaded
-                                                              .toString(),
+                                                          '${files[i].mimeType.split("/")[0][0].toUpperCase()}${files[i].mimeType.split("/")[0].substring(1)}',
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,
@@ -478,10 +476,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                       .bold,
                                                               fontSize:
                                                                   fontsize *
-                                                                      18),
+                                                                      17),
+                                                        )),
+                                                    Expanded(
+                                                        flex: 3,
+                                                        child: Text(
+                                                          files[i].sizeMb,
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize:
+                                                                  fontsize *
+                                                                      17),
+                                                        )),
+                                                    Expanded(
+                                                      flex: 4,
+                                                      child: Text(
+                                                        DateFormat.yMMMd()
+                                                            .format(files[i]
+                                                                .uploadedDate),
+                                                        style: TextStyle(
+                                                          color: Colors.grey,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize:
+                                                              fontsize * 17,
                                                         ),
-                                                      ],
-                                                    )),
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
