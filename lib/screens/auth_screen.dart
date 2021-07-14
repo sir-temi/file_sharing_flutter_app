@@ -1,7 +1,9 @@
+import 'package:cemfrontend/class/device_checker.dart';
 import 'package:cemfrontend/providers/auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
+// import '';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -171,6 +173,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
     final deviceSize = MediaQuery.of(context).size;
     final fontSize = MediaQuery.of(context).textScaleFactor;
+    String deviceType = MyChecker().checker(deviceSize.width.toInt());
+
     return Scaffold(
       body: GestureDetector(
           onTap: () {
@@ -202,10 +206,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 ))
               : SingleChildScrollView(
                   child: Container(
-                      padding: EdgeInsets.only(
-                          top: 20,
-                          bottom:
-                              20),
+                      padding: EdgeInsets.only(top: 20, bottom: 20),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: deviceType == 'tab'
+                              ? deviceSize.width * 0.20
+                              : deviceType == 'large'
+                                  ? deviceSize.width * 0.25
+                                  : 0),
                       child: Column(
                         children: [
                           Container(
@@ -245,7 +252,11 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       .primaryColor
                                                   : Colors.white,
                                               fontWeight: FontWeight.w900,
-                                              fontSize: fontSize * 17),
+                                              fontSize: deviceType == 'tab'
+                                                  ? fontSize * 22
+                                                  : deviceType == 'large'
+                                                      ? fontSize * 25
+                                                      : fontSize * 17),
                                         )),
                                   ),
                                   Expanded(
@@ -267,7 +278,11 @@ class _AuthScreenState extends State<AuthScreen> {
                                                     : Theme.of(context)
                                                         .primaryColorDark,
                                                 fontWeight: FontWeight.w900,
-                                                fontSize: fontSize * 17))),
+                                                fontSize: deviceType == 'tab'
+                                                    ? fontSize * 22
+                                                    : deviceType == 'large'
+                                                        ? fontSize * 25
+                                                        : fontSize * 17))),
                                   )
                                 ],
                               )),
@@ -289,7 +304,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       _logInUsernameController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 23
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.person,
@@ -359,7 +380,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       _logInPasswordController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.lock,
@@ -434,7 +461,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       _fullNameController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.person,
@@ -509,7 +542,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       _usernameController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.person,
@@ -575,7 +614,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                   controller: _emailController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.person,
@@ -646,7 +691,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                       _passwordController,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.lock,
@@ -716,7 +767,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                                   obscureText: true,
                                                   onTap: () async {},
                                                   style: TextStyle(
-                                                      fontSize: fontSize * 18),
+                                                      fontSize: deviceType ==
+                                                              'tab'
+                                                          ? fontSize * 22
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? fontSize * 25
+                                                              : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
                                                       Icons.lock,
@@ -805,7 +862,12 @@ class _AuthScreenState extends State<AuthScreen> {
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w900,
-                                                    fontSize: fontSize * 20),
+                                                    fontSize: deviceType ==
+                                                            'tab'
+                                                        ? fontSize * 25
+                                                        : deviceType == 'large'
+                                                            ? fontSize * 28
+                                                            : fontSize * 20),
                                               ),
                                               onPressed: _submit),
                                           flex: 2,

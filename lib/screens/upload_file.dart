@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cemfrontend/class/device_checker.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:path/path.dart' as pt;
@@ -36,7 +37,6 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
   File? file;
   RecordPlatform recorder = Record();
   var audioFile;
-  
 
   Map data = {
     'username': '',
@@ -143,10 +143,8 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
   }
 
   Future _selectFromMicrophone() async {
-    
     setState(() => file = File(audioFile));
     print(audioFile);
-
   }
 
   Future<void> _submit() async {
@@ -261,12 +259,31 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
     final fontSize = MediaQuery.of(context).textScaleFactor;
     final userName = Provider.of<Auth>(context, listen: false).userName;
     final screensize = MediaQuery.of(context).size;
+    String deviceType = MyChecker().checker(screensize.width.toInt());
+
     return Scaffold(
-      appBar: AppBar(title: Text('Upload File'), actions: [
-        BackButton(
-            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-                '/dashboard', (Route<dynamic> route) => false))
-      ]),
+      appBar: AppBar(
+          title: Text('Upload File',
+              style: TextStyle(
+                  fontSize: deviceType == 'tab'
+                      ? fontSize * 18
+                      : deviceType == 'large'
+                          ? fontSize * 25
+                          : fontSize)),
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/dashboard', (Route<dynamic> route) => false),
+              icon: Icon(
+                Icons.arrow_back,
+                size: deviceType == 'tab'
+                    ? fontSize * 18
+                    : deviceType == 'large'
+                        ? fontSize * 40
+                        : fontSize,
+              ),
+            )
+          ]),
       drawer: DrawerMenu(userName),
       body: _isLoading
           ? Loading('Uploading your file...')
@@ -275,7 +292,18 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
               child: SingleChildScrollView(
                 child: Center(
                   child: Container(
-                    margin: EdgeInsets.only(top: 30, left: 30, right: 30),
+                    margin: EdgeInsets.only(
+                        top: 30,
+                        left: deviceType == 'tab'
+                            ? screensize.width * 0.20
+                            : deviceType == 'large'
+                                ? screensize.width * 0.25
+                                : 30,
+                        right: deviceType == 'tab'
+                            ? screensize.width * 0.20
+                            : deviceType == 'large'
+                                ? screensize.width * 0.25
+                                : 30),
                     padding: EdgeInsets.only(bottom: 20),
                     child: Form(
                       key: _formKey,
@@ -306,7 +334,11 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w900,
-                                            fontSize: fontSize * 20))
+                                            fontSize: deviceType == 'tab'
+                                                ? fontSize * 25
+                                                : deviceType == 'large'
+                                                    ? fontSize * 28
+                                                    : fontSize * 20))
                                   ],
                                 ),
                                 onPressed: () => showDialog(
@@ -358,8 +390,12 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                                                 SimpleDialogOption(
                                                                   onPressed:
                                                                       () {
-                                                                    Navigator.of(context).popUntil(ModalRoute.withName('/upload_file'));
-                                                                    _selectFromCamera('image');
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .popUntil(
+                                                                            ModalRoute.withName('/upload_file'));
+                                                                    _selectFromCamera(
+                                                                        'image');
                                                                   },
                                                                   child: Row(
                                                                     children: [
@@ -397,8 +433,12 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                                                 SimpleDialogOption(
                                                                   onPressed:
                                                                       () {
-                                                                    Navigator.of(context).popUntil(ModalRoute.withName('/upload_file'));
-                                                                    _selectFromCamera('video');
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .popUntil(
+                                                                            ModalRoute.withName('/upload_file'));
+                                                                    _selectFromCamera(
+                                                                        'video');
                                                                   },
                                                                   child: Row(
                                                                     children: [
@@ -457,120 +497,136 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                               ),
                                             ),
                                             SimpleDialogOption(
-                                              onPressed: () async{
+                                              onPressed: () async {
                                                 Navigator.of(context).pop();
-                                                bool result = await recorder.hasPermission();
-                                                if(!result) return;
+                                                bool result = await recorder
+                                                    .hasPermission();
+                                                if (!result) return;
                                                 showDialog(
                                                     context: context,
-                                                    builder:
-                                                        (ctx) { 
-                                                          bool isReco = false;
-                                                          return StatefulBuilder(
-                                                                builder: (context, setState) => SimpleDialog(
-                                                                // title: const Text('Share File',),
-                                                                children: <
-                                                                    Widget>[
-                                                                  Row(
+                                                    builder: (ctx) {
+                                                      bool isReco = false;
+                                                      return StatefulBuilder(
+                                                        builder: (context,
+                                                                setState) =>
+                                                            SimpleDialog(
+                                                          // title: const Text('Share File',),
+                                                          children: <Widget>[
+                                                            Row(
+                                                              children: [
+                                                                SimpleDialogOption(
+                                                                  onPressed:
+                                                                      () async {
+                                                                    final dirs =
+                                                                        await getExternalStorageDirectories();
+                                                                    final path =
+                                                                        dirs![0]
+                                                                            .path;
+                                                                    audioFile =
+                                                                        '$path/audiofile.aac';
+                                                                    setState(
+                                                                        () {
+                                                                      isReco =
+                                                                          !isReco;
+                                                                    });
+                                                                    if (isReco) {
+                                                                      await recorder
+                                                                          .start(
+                                                                        path:
+                                                                            audioFile, // required
+                                                                        encoder:
+                                                                            AudioEncoder.AAC,
+                                                                      );
+                                                                    } else {
+                                                                      await recorder
+                                                                          .stop();
+                                                                    }
+                                                                  },
+                                                                  child: Row(
                                                                     children: [
-                                                                      SimpleDialogOption(
-                                                                        onPressed:
-                                                                            () async{
-                                                                          final dirs = await getExternalStorageDirectories();
-                                                                          final path = dirs![0].path;
-                                                                          audioFile = '$path/audiofile.aac';
-                                                                          setState(() {
-                                                                            isReco = !isReco;
-                                                                          });
-                                                                          if(isReco){
-                                                                            await recorder.start(
-                                                                              path: audioFile, // required
-                                                                              encoder: AudioEncoder.AAC, 
-                                                                            );
-                                                                          }else{
-                                                                            await recorder.stop();
-                                                                          }
-                                                                        },
-                                                                        child: Row(
-                                                                          children: [
-                                                                            Container(
-                                                                              alignment:
-                                                                                  Alignment.center,
-                                                                              width: screensize.width *
-                                                                                  .08,
-                                                                              child:
-                                                                                  FaIcon(
-                                                                                isReco
-                                                                                ? FontAwesomeIcons
-                                                                                    .stop
-                                                                                :FontAwesomeIcons
-                                                                                    .microphoneAlt,
-                                                                                color:
-                                                                                    isReco ?Colors.red :Theme.of(context).primaryColor,
-                                                                                size: fontSize *
-                                                                                    28,
-                                                                              ),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              width:
-                                                                                  5,
-                                                                            ),
-                                                                            Text(
-                                                                                isReco ?'Stop' :'Start',
-                                                                                style:
-                                                                                    TextStyle(
-                                                                                  fontWeight:
-                                                                                      FontWeight.bold,
-                                                                                  fontSize:
-                                                                                      fontSize * 18,
-                                                                                ))
-                                                                          ],
+                                                                      Container(
+                                                                        alignment:
+                                                                            Alignment.center,
+                                                                        width: screensize.width *
+                                                                            .08,
+                                                                        child:
+                                                                            FaIcon(
+                                                                          isReco
+                                                                              ? FontAwesomeIcons.stop
+                                                                              : FontAwesomeIcons.microphoneAlt,
+                                                                          color: isReco
+                                                                              ? Colors.red
+                                                                              : Theme.of(context).primaryColor,
+                                                                          size: fontSize *
+                                                                              28,
                                                                         ),
                                                                       ),
-                                                                      SimpleDialogOption(
-                                                                        onPressed:
-                                                                            () {
-                                                                          Navigator.of(context).popUntil(ModalRoute.withName('/upload_file'));
-                                                                          _selectFromMicrophone();
-                                                                        },
-                                                                        child: Row(
-                                                                          children: [
-                                                                            Container(
-                                                                              alignment:
-                                                                                  Alignment.center,
-                                                                              width: screensize.width *
-                                                                                  .08,
-                                                                              child:
-                                                                                  FaIcon(
-                                                                                FontAwesomeIcons
-                                                                                    .check,
-                                                                                color:
-                                                                                    Theme.of(context).primaryColor,
-                                                                                size: fontSize *
-                                                                                    32,
-                                                                              ),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              width:
-                                                                                  5,
-                                                                            ),
-                                                                            Text(
-                                                                                'DONE',
-                                                                                style:
-                                                                                    TextStyle(
-                                                                                  fontWeight:
-                                                                                      FontWeight.bold,
-                                                                                  fontSize:
-                                                                                      fontSize * 18,
-                                                                                ))
-                                                                          ],
-                                                                        ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            5,
                                                                       ),
+                                                                      Text(
+                                                                          isReco
+                                                                              ? 'Stop'
+                                                                              : 'Start',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            fontSize:
+                                                                                fontSize * 18,
+                                                                          ))
                                                                     ],
                                                                   ),
-                                                                ],
-                                                              ),
-                                                          );});
+                                                                ),
+                                                                SimpleDialogOption(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .popUntil(
+                                                                            ModalRoute.withName('/upload_file'));
+                                                                    _selectFromMicrophone();
+                                                                  },
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Container(
+                                                                        alignment:
+                                                                            Alignment.center,
+                                                                        width: screensize.width *
+                                                                            .08,
+                                                                        child:
+                                                                            FaIcon(
+                                                                          FontAwesomeIcons
+                                                                              .check,
+                                                                          color:
+                                                                              Theme.of(context).primaryColor,
+                                                                          size: fontSize *
+                                                                              32,
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            5,
+                                                                      ),
+                                                                      Text(
+                                                                          'DONE',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                            fontSize:
+                                                                                fontSize * 18,
+                                                                          ))
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    });
                                               },
                                               child: Row(
                                                 children: [
@@ -623,7 +679,12 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                   MaxLengthEnforcement.enforced,
                               controller: _titleController,
                               onTap: () async {},
-                              style: TextStyle(fontSize: fontSize * 18),
+                              style: TextStyle(
+                                  fontSize: deviceType == 'tab'
+                                      ? fontSize * 22
+                                      : deviceType == 'large'
+                                          ? fontSize * 25
+                                          : fontSize * 18),
                               decoration: InputDecoration(
                                 prefixIcon: Icon(
                                   Icons.bookmark_add,
@@ -680,7 +741,12 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                               maxLines: 4,
                               controller: _discriptionController,
                               onTap: () async {},
-                              style: TextStyle(fontSize: fontSize * 18),
+                              style: TextStyle(
+                                  fontSize: deviceType == 'tab'
+                                      ? fontSize * 22
+                                      : deviceType == 'large'
+                                          ? fontSize * 25
+                                          : fontSize * 18),
                               decoration: InputDecoration(
                                 prefixIcon: Icon(
                                   Icons.library_books,
@@ -728,20 +794,31 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                 'Restrict by country',
                                 style: TextStyle(
                                     color: Theme.of(context).primaryColor,
-                                    fontSize: fontSize * 20,
+                                    fontSize: deviceType == 'tab'
+                                        ? fontSize * 22
+                                        : deviceType == 'large'
+                                            ? fontSize * 25
+                                            : fontSize * 18,
                                     fontWeight: FontWeight.bold),
                               ))),
                               Container(
                                 alignment: Alignment.centerRight,
-                                child: Switch(
-                                    value: data['restrictedCountry'],
-                                    activeColor:
-                                        Theme.of(context).primaryColorDark,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        data['restrictedCountry'] = value;
-                                      });
-                                    }),
+                                child: Transform.scale(
+                                  scale: deviceType == 'tab'
+                                      ? 1.2
+                                      : deviceType == 'large'
+                                          ? 1.5
+                                          : 1,
+                                  child: Switch(
+                                      value: data['restrictedCountry'],
+                                      activeColor:
+                                          Theme.of(context).primaryColorDark,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          data['restrictedCountry'] = value;
+                                        });
+                                      }),
+                                ),
                               ),
                             ],
                           ),
@@ -756,20 +833,31 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                 'Restrict by username',
                                 style: TextStyle(
                                     color: Theme.of(context).primaryColor,
-                                    fontSize: fontSize * 20,
+                                    fontSize: deviceType == 'tab'
+                                        ? fontSize * 22
+                                        : deviceType == 'large'
+                                            ? fontSize * 25
+                                            : fontSize * 18,
                                     fontWeight: FontWeight.bold),
                               ))),
                               Container(
                                 alignment: Alignment.centerRight,
-                                child: Switch(
-                                    value: data['restrictedUser'],
-                                    activeColor:
-                                        Theme.of(context).primaryColorDark,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        data['restrictedUser'] = value;
-                                      });
-                                    }),
+                                child: Transform.scale(
+                                  scale: deviceType == 'tab'
+                                      ? 1.2
+                                      : deviceType == 'large'
+                                          ? 1.5
+                                          : 1,
+                                  child: Switch(
+                                      value: data['restrictedUser'],
+                                      activeColor:
+                                          Theme.of(context).primaryColorDark,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          data['restrictedUser'] = value;
+                                        });
+                                      }),
+                                ),
                               ),
                             ],
                           ),
@@ -779,7 +867,12 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                   child: TextFormField(
                                     controller: _usernameController,
                                     onTap: () async {},
-                                    style: TextStyle(fontSize: fontSize * 18),
+                                    style: TextStyle(
+                                        fontSize: deviceType == 'tab'
+                                            ? fontSize * 22
+                                            : deviceType == 'large'
+                                                ? fontSize * 25
+                                                : fontSize * 18),
                                     decoration: InputDecoration(
                                       prefixIcon: Icon(
                                         Icons.person,
@@ -857,7 +950,11 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
                                               style: TextStyle(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w900,
-                                                  fontSize: fontSize * 20))
+                                                  fontSize: deviceType == 'tab'
+                                                      ? fontSize * 25
+                                                      : deviceType == 'large'
+                                                          ? fontSize * 28
+                                                          : fontSize * 20))
                                         ],
                                       ),
                                       onPressed: _submit),

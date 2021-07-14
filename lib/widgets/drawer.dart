@@ -1,3 +1,4 @@
+import 'package:cemfrontend/class/device_checker.dart';
 import 'package:flutter/material.dart';
 import '../providers/auth.dart';
 import 'package:provider/provider.dart';
@@ -10,18 +11,27 @@ class DrawerMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     final fontSize = MediaQuery.of(context).textScaleFactor;
+    String deviceType = MyChecker().checker(deviceSize.width.toInt());
     Widget buildListTile(String title, IconData icon, VoidCallback todo) {
       return ListTile(
         onTap: todo,
         leading: Icon(
           icon,
-          size: 32,
+          size: deviceType == 'tab'
+              ? fontSize * 36
+              : deviceType == 'large'
+                  ? fontSize * 40
+                  : fontSize * 32,
           color: Theme.of(context).primaryColor,
         ),
         title: Text(
           title,
           style: TextStyle(
-            fontSize: 22,
+            fontSize: deviceType == 'tab'
+                ? fontSize * 26
+                : deviceType == 'large'
+                    ? fontSize * 30
+                    : fontSize * 22,
             color: Theme.of(context).primaryColorDark,
           ),
         ),
@@ -32,7 +42,7 @@ class DrawerMenu extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           Container(
-            height: deviceSize.height * .1,
+            height: deviceSize.height * .2,
             child: DrawerHeader(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
@@ -44,20 +54,33 @@ class DrawerMenu extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      height: 50,
-                      width: 50,
-                      child: Image.asset("assets/images/dp.png"),
-                        // height: 0.1,
-                        // width: 0.1,
-                        // fit: BoxFit.cover,
-                      
+                      height: deviceType == 'tab'
+                          ? 70
+                          : deviceType == 'large'
+                              ? 80
+                              : 50,
+                      width: deviceType == 'tab'
+                          ? 70
+                          : deviceType == 'large'
+                              ? 80
+                              : 50,
+                      child: Image.asset(
+                        "assets/images/dp.png",
+                        fit: BoxFit.fill,
+                      ),
+                      // height: 0.1,
+                      // width: 0.1,
                     ),
                     SizedBox(width: 10),
                     Text(
                       '${userName[0].toUpperCase()}${userName.substring(1)}',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
-                        fontSize: fontSize *20,
+                        fontSize: deviceType == 'tab'
+                            ? fontSize * 26
+                            : deviceType == 'large'
+                                ? fontSize * 30
+                                : fontSize * 20,
                         color: Colors.white,
                       ),
                     ),
@@ -65,9 +88,10 @@ class DrawerMenu extends StatelessWidget {
                 )),
           ),
           buildListTile(
-              'My Dashboard',
-              Icons.dashboard,
-              () => Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (Route<dynamic> route) => false),
+            'My Dashboard',
+            Icons.dashboard,
+            () => Navigator.of(context).pushNamedAndRemoveUntil(
+                '/dashboard', (Route<dynamic> route) => false),
           ),
           // buildListTile(
           //     'My Files',
@@ -79,7 +103,7 @@ class DrawerMenu extends StatelessWidget {
           //     ),
           buildListTile(
             'Log Out',
-            Icons.exit_to_app,
+            Icons.power_settings_new_sharp,
             () async {
               Provider.of<Auth>(context, listen: false).logout();
             },

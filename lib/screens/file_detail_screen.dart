@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:cemfrontend/class/device_checker.dart';
 import 'package:cemfrontend/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -101,8 +102,18 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final fontSize = MediaQuery.of(context).textScaleFactor;
+    final screensize = MediaQuery.of(context).size;
+    String deviceType = MyChecker().checker(screensize.width.toInt());
     final PreferredSizeWidget appBar = AppBar(
-      title: Text(title),
+      title: Text(
+        title,
+        style: TextStyle(
+            fontSize: deviceType == 'tab'
+                ? fontSize * 18
+                : deviceType == 'large'
+                    ? fontSize * 25
+                    : fontSize),
+      ),
       actions: isUser
           ? [
               GestureDetector(
@@ -159,9 +170,23 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                               ),
                             ],
                           )),
-                  child: Icon(Icons.info_outlined)),
+                  child: Icon(
+                    Icons.info_outlined,
+                    size: deviceType == 'tab'
+                        ? fontSize * 18
+                        : deviceType == 'large'
+                            ? fontSize * 40
+                            : fontSize,
+                  )),
               IconButton(
-                icon: Icon(Icons.share_rounded),
+                icon: Icon(
+                  Icons.share_rounded,
+                  size: deviceType == 'tab'
+                      ? fontSize * 18
+                      : deviceType == 'large'
+                          ? fontSize * 40
+                          : fontSize,
+                ),
                 onPressed: () {
                   showDialog(
                       context: context,
@@ -247,19 +272,37 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                           ));
                 },
               ),
-              BackButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushNamedAndRemoveUntil(
-                          '/dashboard', (Route<dynamic> route) => false)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/dashboard', (Route<dynamic> route) => false),
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: deviceType == 'tab'
+                      ? fontSize * 18
+                      : deviceType == 'large'
+                          ? fontSize * 40
+                          : fontSize,
+                ),
+              ),
+              SizedBox(
+                width: 30,
+              )
             ]
           : [
-              BackButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushNamedAndRemoveUntil(
-                          '/dashboard', (Route<dynamic> route) => false)),
+              IconButton(
+                onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/dashboard', (Route<dynamic> route) => false),
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: deviceType == 'tab'
+                      ? fontSize * 18
+                      : deviceType == 'large'
+                          ? fontSize * 40
+                          : fontSize,
+                ),
+              ),
             ],
     );
-    final screensize = MediaQuery.of(context).size;
     final appBarheight = appBar.preferredSize.height;
     final batterybar = MediaQuery.of(context).padding.top;
     final screenSize = screensize.height - (appBarheight + batterybar);
@@ -300,12 +343,17 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
               : SingleChildScrollView(
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.only(top: 10, left: 15, right: 15),
+                    padding: EdgeInsets.only(
+                        top: 10, left: 15, right: 15, bottom: 20),
                     child: Column(
                       children: [
                         Container(
                           width: double.infinity,
-                          height: screenSize * .20,
+                          height: deviceType == 'tab'
+                              ? screensize.width * 0.4
+                              : deviceType == 'large'
+                                  ? screenSize * .5
+                                  : screenSize * .20,
                           alignment: Alignment.center,
                           child: Image.network(
                             result['data']['thumbnail'],
@@ -317,7 +365,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                           result['data']['title'],
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontSize: fontSize * 30,
+                              fontSize: deviceType == 'tab'
+                                  ? fontSize * 38
+                                  : deviceType == 'large'
+                                      ? fontSize * 40
+                                      : fontSize * 30,
                               fontWeight: FontWeight.w800,
                               color: Theme.of(context).primaryColor),
                         ),
@@ -325,13 +377,23 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                         Container(
                           child: Text(result['data']['description'],
                               style: TextStyle(
-                                fontSize: fontSize * 16,
+                                fontSize: deviceType == 'tab'
+                                    ? fontSize * 22
+                                    : deviceType == 'large'
+                                        ? fontSize * 25
+                                        : fontSize * 16,
                                 fontWeight: FontWeight.w800,
                                 // color: Theme.of(context).primaryColor
                               )),
                         ),
                         SizedBox(height: 10),
                         Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: deviceType == 'tab'
+                                  ? screensize.width * 0.05
+                                  : deviceType == 'large'
+                                      ? screensize.width * 0.06
+                                      : 0),
                           width: double.infinity,
                           child: Card(
                               elevation: 7,
@@ -339,7 +401,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 20),
                                 child: Column(children: [
-                                  DetailRows(fontSize, [
+                                  DetailRows(deviceType, fontSize, [
                                     result['data']['downloaded'],
                                     '${result['data']['mimeType'].split("/")[0][0].toUpperCase()}${result['data']['mimeType'].split("/")[0].substring(1)}'
                                   ], [
@@ -347,7 +409,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                     Icons.category_outlined
                                   ]),
                                   SizedBox(height: screenSize * .05),
-                                  DetailRows(fontSize, [
+                                  DetailRows(deviceType, fontSize, [
                                     result['data']['size_mb'],
                                     result['data']['fileOwner']['username']
                                   ], [
@@ -361,7 +423,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                       Icon(
                                         Icons.date_range_rounded,
                                         color: Theme.of(context).primaryColor,
-                                        size: fontSize * 30,
+                                        size: deviceType == 'tab'
+                                            ? fontSize * 35
+                                            : deviceType == 'large'
+                                                ? fontSize * 40
+                                                : fontSize * 24,
                                       ),
                                       SizedBox(width: 5),
                                       Text(
@@ -369,7 +435,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                             result['data']['uploadedDate']),
                                         style: TextStyle(
                                             // color: Colors.grey,
-                                            fontSize: fontSize * 25,
+                                            fontSize: deviceType == 'tab'
+                                                ? fontSize * 35
+                                                : deviceType == 'large'
+                                                    ? fontSize * 38
+                                                    : fontSize * 24,
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -391,29 +461,43 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                     'Restricted by country',
                                                     style: TextStyle(
                                                         // color: Colors.grey,
-                                                        fontSize: fontSize * 20,
+                                                        fontSize: deviceType ==
+                                                                'tab'
+                                                            ? fontSize * 26
+                                                            : deviceType ==
+                                                                    'large'
+                                                                ? fontSize * 32
+                                                                : fontSize * 20,
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
                                                   SizedBox(width: 5),
-                                                  Switch(
-                                                      value: byCountry,
-                                                      activeColor:
-                                                          Theme.of(context)
-                                                              .primaryColorDark,
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          Provider.of<Files>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .setRestrictedUser(
-                                                                  'by_country',
-                                                                  result['data']
-                                                                      [
-                                                                      'identifier']);
-                                                          byCountry = value;
-                                                        });
-                                                      })
+                                                  Transform.scale(
+                                                    scale: deviceType == 'tab'
+                                                        ? 1.2
+                                                        : deviceType == 'large'
+                                                            ? 1.5
+                                                            : 1,
+                                                    child: Switch(
+                                                        value: byCountry,
+                                                        activeColor: Theme.of(
+                                                                context)
+                                                            .primaryColorDark,
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            Provider.of<Files>(
+                                                                    context,
+                                                                    listen:
+                                                                        false)
+                                                                .setRestrictedUser(
+                                                                    'by_country',
+                                                                    result['data']
+                                                                        [
+                                                                        'identifier']);
+                                                            byCountry = value;
+                                                          });
+                                                        }),
+                                                  )
                                                 ],
                                               ),
                                               SizedBox(
@@ -427,30 +511,44 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                     'Restricted by user',
                                                     style: TextStyle(
                                                         // color: Colors.grey,
-                                                        fontSize: fontSize * 20,
+                                                        fontSize: deviceType ==
+                                                                'tab'
+                                                            ? fontSize * 26
+                                                            : deviceType ==
+                                                                    'large'
+                                                                ? fontSize * 32
+                                                                : fontSize * 20,
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
                                                   SizedBox(width: 5),
-                                                  Switch(
-                                                      value: byUser,
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          Provider.of<Files>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .setRestrictedUser(
-                                                                  'by_user',
-                                                                  result['data']
-                                                                      [
-                                                                      'identifier']);
-                                                          byUser = value;
-                                                        });
-                                                      },
-                                                      // activeTrackColor: Colors.yellow,
-                                                      activeColor:
-                                                          Theme.of(context)
-                                                              .primaryColorDark)
+                                                  Transform.scale(
+                                                    scale: deviceType == 'tab'
+                                                        ? 1.2
+                                                        : deviceType == 'large'
+                                                            ? 1.5
+                                                            : 1,
+                                                    child: Switch(
+                                                        value: byUser,
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            Provider.of<Files>(
+                                                                    context,
+                                                                    listen:
+                                                                        false)
+                                                                .setRestrictedUser(
+                                                                    'by_user',
+                                                                    result['data']
+                                                                        [
+                                                                        'identifier']);
+                                                            byUser = value;
+                                                          });
+                                                        },
+                                                        // activeTrackColor: Colors.yellow,
+                                                        activeColor: Theme.of(
+                                                                context)
+                                                            .primaryColorDark),
+                                                  )
                                                 ],
                                               ),
                                             ],
@@ -472,7 +570,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                   backgroundColor: Theme.of(context).primaryColor,
                   child: Icon(
                     Icons.delete,
-                    size: fontSize * 35,
+                    size: deviceType == 'tab'
+                        ? fontSize * 40
+                        : deviceType == 'large'
+                            ? fontSize * 45
+                            : fontSize * 35,
                     color: Colors.white,
                   ),
                   onPressed: () {

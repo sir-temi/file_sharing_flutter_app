@@ -1,3 +1,4 @@
+import 'package:cemfrontend/class/device_checker.dart';
 import 'package:cemfrontend/screens/file_detail_screen.dart';
 import 'package:cemfrontend/widgets/drawer.dart';
 import 'package:cemfrontend/widgets/loading.dart';
@@ -188,17 +189,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screensize = MediaQuery.of(context).size;
     final fontsize = MediaQuery.of(context).textScaleFactor;
+    String deviceType = MyChecker().checker(screensize.width.toInt());
     final PreferredSizeWidget appBar = AppBar(
-      title: Text('My Dashboard'),
+      title: Text('My Dashboard',
+          style: TextStyle(
+              fontSize: deviceType == 'tab'
+                  ? fontsize * 18
+                  : deviceType == 'large'
+                      ? fontsize * 25
+                      : fontsize)),
       actions: [
         IconButton(
             onPressed: () => Navigator.of(context).pushNamed('/search_file'),
-            icon: Icon(Icons.search))
+            icon: Icon(
+              Icons.search,
+              size: deviceType == 'tab'
+                  ? fontsize * 18
+                  : deviceType == 'large'
+                      ? fontsize * 40
+                      : fontsize,
+            )),
+        SizedBox(
+          width: 20,
+        )
         // icon: AnimatedIcon(icon: ,progress: ),
       ],
     );
-    final screensize = MediaQuery.of(context).size;
     final appBarheight = appBar.preferredSize.height;
     final batterybar = MediaQuery.of(context).padding.top;
     final paddingButtom = MediaQuery.of(context).padding.bottom;
@@ -231,7 +249,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Theme.of(context).primaryColorDark,
-                                fontSize: fontsize * 20,
+                                fontSize: deviceType == 'tab'
+                                    ? fontsize * 28
+                                    : deviceType == 'large'
+                                        ? fontsize * 32
+                                        : fontsize * 20,
                                 fontWeight: FontWeight.w900))
                       ],
                     ),
@@ -267,7 +289,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       style: TextStyle(
                                           fontSize: fontsize * 40,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.greenAccent),
+                                          color: Colors.green),
                                     ),
                                   ],
                                 ),
@@ -411,7 +433,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             //     EdgeInsets.symmetric(vertical: 2),
                                             child: ListTile(
                                               leading: Container(
-                                                width: screenSize * .11,
+                                                width: deviceType == 'tab'
+                                                    ? screensize.width * 0.18
+                                                    : deviceType == 'large'
+                                                        ? screenSize * .14
+                                                        : screenSize * .11,
                                                 child: Image.network(
                                                   files[i].thumbnail,
                                                   fit: BoxFit.fill,
@@ -419,40 +445,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               ),
                                               title: Row(
                                                 children: [
-                                                  Text(
-                                                    files[i].title,
-                                                    style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .primaryColorDark,
-                                                        fontSize: fontsize * 18,
-                                                        fontWeight:
-                                                            FontWeight.bold),
+                                                  Expanded(
+                                                    flex: 9,
+                                                    child: Text(
+                                                      files[i].title,
+                                                      style: TextStyle(
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .primaryColorDark,
+                                                          fontSize: deviceType ==
+                                                                  'tab'
+                                                              ? fontsize * 25
+                                                              : deviceType ==
+                                                                      'large'
+                                                                  ? fontsize *
+                                                                      28
+                                                                  : fontsize *
+                                                                      18,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
                                                   ),
                                                   Expanded(
-                                                    child: Text(""),
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.download_rounded,
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 2,
-                                                      ),
-                                                      Text(
-                                                        files[i]
-                                                            .downloaded
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            color: Colors.grey,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize:
-                                                                fontsize * 18),
-                                                      ),
-                                                    ],
+                                                    flex: 1,
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .download_rounded,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .primaryColor,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 2,
+                                                        ),
+                                                        Text(
+                                                          files[i]
+                                                              .downloaded
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: deviceType ==
+                                                                      'tab'
+                                                                  ? fontsize *
+                                                                      25
+                                                                  : deviceType ==
+                                                                          'large'
+                                                                      ? fontsize *
+                                                                          28
+                                                                      : fontsize *
+                                                                          18),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   )
                                                 ],
                                               ),
@@ -465,21 +515,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Expanded(
-                                                        flex: 2,
+                                                        flex:
+                                                            deviceType == 'tab'
+                                                                ? 1
+                                                                : deviceType ==
+                                                                        'large'
+                                                                    ? 1
+                                                                    : 2,
                                                         child: Text(
-                                                          '${files[i].mimeType.split("/")[0][0].toUpperCase()}${files[i].mimeType.split("/")[0].substring(1)}',
+                                                          '${files[i].mimeType.split("/")[0].toUpperCase()}',
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                              fontSize:
-                                                                  fontsize *
-                                                                      17),
+                                                              fontSize: deviceType ==
+                                                                      'tab'
+                                                                  ? fontsize *
+                                                                      20
+                                                                  : deviceType ==
+                                                                          'large'
+                                                                      ? fontsize *
+                                                                          22
+                                                                      : fontsize *
+                                                                          17),
                                                         )),
                                                     Expanded(
-                                                        flex: 3,
+                                                        flex:
+                                                            deviceType == 'tab'
+                                                                ? 1
+                                                                : deviceType ==
+                                                                        'large'
+                                                                    ? 1
+                                                                    : 3,
                                                         child: Text(
                                                           files[i].sizeMb,
                                                           style: TextStyle(
@@ -488,12 +557,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                              fontSize:
-                                                                  fontsize *
-                                                                      17),
+                                                              fontSize: deviceType ==
+                                                                      'tab'
+                                                                  ? fontsize *
+                                                                      20
+                                                                  : deviceType ==
+                                                                          'large'
+                                                                      ? fontsize *
+                                                                          22
+                                                                      : fontsize *
+                                                                          17),
                                                         )),
                                                     Expanded(
-                                                      flex: 4,
+                                                      flex: deviceType == 'tab'
+                                                          ? 1
+                                                          : deviceType ==
+                                                                  'large'
+                                                              ? 1
+                                                              : 4,
                                                       child: Text(
                                                         DateFormat.yMMMd()
                                                             .format(files[i]
@@ -502,8 +583,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           color: Colors.grey,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          fontSize:
-                                                              fontsize * 17,
+                                                          fontSize: deviceType ==
+                                                                  'tab'
+                                                              ? fontsize * 20
+                                                              : deviceType ==
+                                                                      'large'
+                                                                  ? fontsize *
+                                                                      22
+                                                                  : fontsize *
+                                                                      17,
                                                         ),
                                                       ),
                                                     ),
