@@ -73,13 +73,13 @@ class DrawerMenu extends StatelessWidget {
                     ),
                     SizedBox(width: 10),
                     Text(
-                      '${userName[0].toUpperCase()}${userName.substring(1)}',
+                      userName != null ? '${userName.toUpperCase()}' : '',
                       style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: deviceType == 'tab'
-                            ? fontSize * 26
+                            ? fontSize * 23
                             : deviceType == 'large'
-                                ? fontSize * 30
+                                ? fontSize * 26
                                 : fontSize * 20,
                         color: Colors.white,
                       ),

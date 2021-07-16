@@ -176,7 +176,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                         ? fontSize * 18
                         : deviceType == 'large'
                             ? fontSize * 40
-                            : fontSize,
+                            : 30,
                   )),
               IconButton(
                 icon: Icon(
@@ -185,7 +185,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                       ? fontSize * 18
                       : deviceType == 'large'
                           ? fontSize * 40
-                          : fontSize,
+                          : 30,
                 ),
                 onPressed: () {
                   showDialog(
@@ -202,18 +202,24 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                 },
                                 child: Row(
                                   children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.whatsapp,
-                                      color: Color.fromRGBO(37, 211, 102, 1),
-                                      size: fontSize * 28,
-                                    ),
+                                    FaIcon(FontAwesomeIcons.whatsapp,
+                                        color: Color.fromRGBO(37, 211, 102, 1),
+                                        size: deviceType == 'tab'
+                                            ? fontSize * 25
+                                            : deviceType == 'large'
+                                                ? fontSize * 30
+                                                : fontSize * 18),
                                     SizedBox(
                                       width: 5,
                                     ),
                                     Text(' Share via WhatsApp',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: fontSize * 17,
+                                          fontSize: deviceType == 'tab'
+                                              ? fontSize * 25
+                                              : deviceType == 'large'
+                                                  ? fontSize * 30
+                                                  : fontSize * 18,
                                         ))
                                   ],
                                 ),
@@ -226,18 +232,24 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                 },
                                 child: Row(
                                   children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.twitter,
-                                      color: Color.fromRGBO(29, 161, 242, 1),
-                                      size: fontSize * 28,
-                                    ),
+                                    FaIcon(FontAwesomeIcons.twitter,
+                                        color: Color.fromRGBO(29, 161, 242, 1),
+                                        size: deviceType == 'tab'
+                                            ? fontSize * 25
+                                            : deviceType == 'large'
+                                                ? fontSize * 30
+                                                : fontSize * 18),
                                     SizedBox(
                                       width: 5,
                                     ),
                                     Text(' Share via Twitter',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: fontSize * 17,
+                                          fontSize: deviceType == 'tab'
+                                              ? fontSize * 25
+                                              : deviceType == 'large'
+                                                  ? fontSize * 30
+                                                  : fontSize * 18,
                                         ))
                                   ],
                                 ),
@@ -254,7 +266,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                     FaIcon(FontAwesomeIcons.userAlt,
                                         color:
                                             Theme.of(context).primaryColorDark,
-                                        size: fontSize * 25),
+                                        size: deviceType == 'tab'
+                                            ? fontSize * 25
+                                            : deviceType == 'large'
+                                                ? fontSize * 30
+                                                : fontSize * 18),
                                     SizedBox(
                                       width: 5,
                                     ),
@@ -262,7 +278,11 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                       ' Share via Username',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: fontSize * 17,
+                                        fontSize: deviceType == 'tab'
+                                            ? fontSize * 25
+                                            : deviceType == 'large'
+                                                ? fontSize * 30
+                                                : fontSize * 18,
                                       ),
                                     )
                                   ],
@@ -278,10 +298,10 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                 icon: Icon(
                   Icons.arrow_back,
                   size: deviceType == 'tab'
-                      ? fontSize * 18
+                      ? fontSize * 25
                       : deviceType == 'large'
                           ? fontSize * 40
-                          : fontSize,
+                          : 30,
                 ),
               ),
               SizedBox(
@@ -295,10 +315,10 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                 icon: Icon(
                   Icons.arrow_back,
                   size: deviceType == 'tab'
-                      ? fontSize * 18
+                      ? fontSize * 35
                       : deviceType == 'large'
                           ? fontSize * 40
-                          : fontSize,
+                          : 30,
                 ),
               ),
             ],
@@ -326,7 +346,7 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                           size: fontSize * 100,
                         ),
                         Text(
-                          !result['alert'].contains('user')
+                          result['alert'].contains('user')
                               ? 'This file is only accessible to a particular user'
                               : 'Your country is restricted from this file',
                           textAlign: TextAlign.center,
@@ -507,19 +527,39 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Text(
-                                                    'Restricted by user',
-                                                    style: TextStyle(
-                                                        // color: Colors.grey,
-                                                        fontSize: deviceType ==
-                                                                'tab'
-                                                            ? fontSize * 26
-                                                            : deviceType ==
-                                                                    'large'
-                                                                ? fontSize * 32
-                                                                : fontSize * 20,
-                                                        fontWeight:
-                                                            FontWeight.bold),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        'Restricted by user',
+                                                        style: TextStyle(
+                                                            // color: Colors.grey,
+                                                            fontSize: deviceType ==
+                                                                    'tab'
+                                                                ? fontSize * 26
+                                                                : deviceType ==
+                                                                        'large'
+                                                                    ? fontSize *
+                                                                        32
+                                                                    : fontSize *
+                                                                        20,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      result['data']
+                                                              ['restrictedUser']
+                                                          ? Tooltip(
+                                                              message: result[
+                                                                      'data'][
+                                                                  'authorisedUser'],
+                                                              child: Icon(Icons
+                                                                  .info_outline_rounded),
+                                                            )
+                                                          : Container()
+                                                    ],
                                                   ),
                                                   SizedBox(width: 5),
                                                   Transform.scale(
@@ -656,44 +696,46 @@ class _FileDetailScreenState extends State<FileDetailScreen> {
                             ));
                   }),
             )
-          : Container(
-              margin: EdgeInsets.only(bottom: 40),
-              child: FloatingActionButton(
-                  focusColor: Theme.of(context).primaryColorDark,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: Icon(
-                    Icons.download_sharp,
-                    size: fontSize * 35,
-                    color: Colors.white,
-                  ),
-                  onPressed: () async {
-                    final status = await Permission.storage.request();
-                    if (status.isGranted) {
-                      setState(() {
-                        _isLoading = true;
+          : result['message'] == false
+              ? Container()
+              : Container(
+                  margin: EdgeInsets.only(bottom: 40),
+                  child: FloatingActionButton(
+                      focusColor: Theme.of(context).primaryColorDark,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child: Icon(
+                        Icons.download_sharp,
+                        size: fontSize * 35,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {
+                        final status = await Permission.storage.request();
+                        if (status.isGranted) {
+                          setState(() {
+                            _isLoading = true;
 
-                        Provider.of<Files>(context, listen: false).downloadFile(
-                            result['data']['identifier'],
-                            result['data']['mimeType']);
-                        _isLoading = false;
-                        Navigator.of(context).pushNamed('/download',
-                            arguments: result['data']['identifier']);
-                      });
-                    } else {
-                      print('Permission denied');
-                      Navigator.of(context).pop();
-                    }
-                    // setState(() {
-                    //   _isLoading = true;
-                    // });
-                    // final taskId = await FlutterDownloader.enqueue(
-                    //   url: result['data']['file'],
-                    //   savedDir: 'the path of directory where you want to save downloaded files',
-                    //   showNotification: true, // show download progress in status bar (for Android)
-                    //   openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-                    // );
-                  }),
-            ),
+                            Provider.of<Files>(context, listen: false)
+                                .downloadFile(result['data']['identifier'],
+                                    result['data']['mimeType']);
+                            _isLoading = false;
+                            Navigator.of(context).pushNamed('/download',
+                                arguments: result['data']['identifier']);
+                          });
+                        } else {
+                          print('Permission denied');
+                          Navigator.of(context).pop();
+                        }
+                        // setState(() {
+                        //   _isLoading = true;
+                        // });
+                        // final taskId = await FlutterDownloader.enqueue(
+                        //   url: result['data']['file'],
+                        //   savedDir: 'the path of directory where you want to save downloaded files',
+                        //   showNotification: true, // show download progress in status bar (for Android)
+                        //   openFileFromNotification: true, // click on notification to open downloaded file (for Android)
+                        // );
+                      }),
+                ),
     );
   }
 }

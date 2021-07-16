@@ -104,17 +104,18 @@ class Files with ChangeNotifier {
   }
 
   Future<Map> getFileDetails(String identifier, String? userAccessing) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identifier/');
+    final res = await http.get(Uri.parse('http://ip-api.com/json'));
+    final country = json.decode(res.body)['country'].toString();
+    String identity = identifier + '-' + country;
+    final url = Uri.parse('http://10.0.2.2:8000/api/v1/files/$identity/');
 
     final response = await http.get(url, headers: {
       'Authorization': 'Bearer $authToken',
     });
 
+    final file = json.decode(response.body)[0];
     if (response.statusCode == 200) {
-      final file = json.decode(response.body)[0];
-      // try {
       if (userAccessing == file['owner']['username']) {
-        print(file);
         return {
           'message': true,
           'isUser': true,
@@ -137,48 +138,41 @@ class Files with ChangeNotifier {
           }
         };
       } else {
-        final res = await http.get(Uri.parse('http://ip-api.com/json'));
-        final country = json.decode(res.body)['country'].toString();
-        String identity = identifier + '-' + country;
-        final response = await http.get(
-          Uri.parse('http://10.0.2.2:8000/api/v1/files/$identity/'),
-          headers: {
-            'Authorization': 'Bearer $authToken',
+        Map file = json.decode(response.body)[0];
+        return {
+          'message': true,
+          'isUser': false,
+          'data': {
+            'authorisedUser': file['authorised_user'],
+            'description': file['description'],
+            'downloaded': file['downloaded'],
+            'file': 'http://10.0.2.2:8000' + file['file'],
+            'fileOwner': file['owner'],
+            'identifier': file['identifier'],
+            'location': file['location'],
+            'mimeType': file['mime_type'],
+            'restrictedCountry': file['restricted_by_country'],
+            'restrictedUser': file['restricted_by_user'],
+            'size_mb': file['size_mb'],
+            'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
+            'title': file['title'],
+            'uploadedDate': DateTime.parse(file['uploaded_date'])
           },
-        );
-
-        if (response.statusCode == 401) {
-          return {
-            'message': false,
-            'isUser': false,
-            'alert': json.decode(response.body)['message'].split(" ")[1],
-            'data': 'null'
-          };
-        } else if (response.statusCode == 200) {
-          Map file = json.decode(response.body);
-          return {
-            'message': true,
-            'isUser': false,
-            'data': {
-              'authorisedUser': file['authorised_user'],
-              'description': file['description'],
-              'downloaded': file['downloaded'],
-              'file': 'http://10.0.2.2:8000' + file['file'],
-              'fileOwner': file['owner'],
-              'identifier': file['identifier'],
-              'location': file['location'],
-              'mimeType': file['mime_type'],
-              'restrictedCountry': file['restricted_by_country'],
-              'restrictedUser': file['restricted_by_user'],
-              'size_mb': file['size_mb'],
-              'thumbnail': 'http://10.0.2.2:8000' + file['thumbnail'],
-              'title': file['title'],
-              'uploadedDate': DateTime.parse(file['uploaded_date'])
-            },
-            'alert': 'null'
-          };
-        }
+          'alert': 'null'
+        };
       }
+    } else if (response.statusCode == 401) {
+      print(json.decode(response.body)[0]['message'].split(" ")[1]);
+      return {
+        'message': false,
+        'isUser': false,
+        'alert': json.decode(response.body)[0]['message'].split(" ")[1],
+        'data': {
+          'restrictedCountry': true,
+          'restrictedUser': true,
+          'title': 'Restricted file'
+        }
+      };
     }
     throw ('ERROR');
   }
@@ -317,31 +311,35 @@ class Files with ChangeNotifier {
   }
 
   Future<bool> uploadFile(Map data, File? file, String name) async {
+    // Make api call to get user location
     final res = await http.get(Uri.parse('http://ip-api.com/json'));
     final country = json.decode(res.body)['country'].toString();
 
-    var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
-    var request = http.MultipartRequest('POST', uri);
-    request.headers['Authorization'] = 'Bearer $authToken';
-    request.files.add(await http.MultipartFile.fromPath('file', file!.path));
-    request.fields['title'] = data['title'];
-    request.fields['title'] = data['title'];
-    request.fields['description'] = data['description'];
-    request.fields['authorised_user'] = data['username'];
-    request.fields['file_name'] = name;
-    request.fields['mb'] = filesize(file.lengthSync(), 1);
-    request.fields['bytes'] = file.lengthSync().toString();
-    request.fields['location'] = country;
-    request.fields['restricted_by_user'] =
-        data['restrictedUser'] ? "true" : "false";
-    request.fields['restricted_by_country'] =
-        data['restrictedCountry'] ? "true" : "false";
-    // var response = await request.send();
+    // make a post request to upload file to server
+    try {
+      var uri = Uri.parse('http://10.0.2.2:8000/api/v1/files/');
+      var request = http.MultipartRequest('POST', uri);
+      request.headers['Authorization'] = 'Bearer $authToken';
+      request.files.add(await http.MultipartFile.fromPath('file', file!.path));
+      request.fields['title'] = data['title'];
+      request.fields['description'] = data['description'];
+      request.fields['authorised_user'] = data['username'];
+      request.fields['file_name'] = name;
+      request.fields['mb'] = filesize(file.lengthSync(), 1);
+      request.fields['bytes'] = file.lengthSync().toString();
+      request.fields['location'] = country;
+      request.fields['restricted_by_user'] =
+          data['restrictedUser'] ? "true" : "false";
+      request.fields['restricted_by_country'] =
+          data['restrictedCountry'] ? "true" : "false";
 
-    final StreamedResponse response = await Client().send(request);
+      final StreamedResponse response = await Client().send(request);
 
-    if (response.statusCode == 201) {
-      return true;
+      if (response.statusCode == 201) {
+        return true;
+      }
+    } catch (e) {
+      throw (e);
     }
     return false;
   }

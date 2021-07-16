@@ -266,10 +266,10 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
           title: Text('Upload File',
               style: TextStyle(
                   fontSize: deviceType == 'tab'
-                      ? fontSize * 18
+                      ? fontSize * 22
                       : deviceType == 'large'
                           ? fontSize * 25
-                          : fontSize)),
+                          : 18)),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(

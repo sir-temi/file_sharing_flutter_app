@@ -196,20 +196,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: Text('My Dashboard',
           style: TextStyle(
               fontSize: deviceType == 'tab'
-                  ? fontsize * 18
+                  ? fontsize * 22
                   : deviceType == 'large'
                       ? fontsize * 25
-                      : fontsize)),
+                      : 18)),
       actions: [
         IconButton(
             onPressed: () => Navigator.of(context).pushNamed('/search_file'),
             icon: Icon(
               Icons.search,
               size: deviceType == 'tab'
-                  ? fontsize * 18
+                  ? fontsize * 35
                   : deviceType == 'large'
                       ? fontsize * 40
-                      : fontsize,
+                      : 30,
             )),
         SizedBox(
           width: 20,
@@ -446,7 +446,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               title: Row(
                                                 children: [
                                                   Expanded(
-                                                    flex: 9,
+                                                    flex: 8,
                                                     child: Text(
                                                       files[i].title,
                                                       style: TextStyle(
@@ -467,7 +467,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     ),
                                                   ),
                                                   Expanded(
-                                                    flex: 1,
+                                                    flex: 2,
                                                     child: Row(
                                                       children: [
                                                         Icon(

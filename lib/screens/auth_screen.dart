@@ -89,6 +89,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _isLoading = true;
     });
 
+    clearFields();
     try {
       if (_register == false) {
         await Provider.of<Auth>(context, listen: false)
@@ -470,7 +471,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                                               : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
-                                                      Icons.person,
+                                                      Icons.contact_page,
                                                       color: Theme.of(context)
                                                           .primaryColorDark,
                                                     ),
@@ -623,7 +624,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                                               : fontSize * 18),
                                                   decoration: InputDecoration(
                                                     prefixIcon: Icon(
-                                                      Icons.person,
+                                                      Icons.email,
                                                       color: Theme.of(context)
                                                           .primaryColorDark,
                                                     ),

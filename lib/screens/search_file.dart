@@ -133,7 +133,7 @@ class _SearchFileScreenState extends State<SearchFileScreen> {
                       ? fontSize * 18
                       : deviceType == 'large'
                           ? fontSize * 25
-                          : fontSize)),
+                          : 18)),
           actions: [
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -143,7 +143,7 @@ class _SearchFileScreenState extends State<SearchFileScreen> {
                     ? fontSize * 18
                     : deviceType == 'large'
                         ? fontSize * 40
-                        : fontSize,
+                        : 18,
               ),
             ),
             SizedBox(
